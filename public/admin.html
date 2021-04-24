@@ -106,8 +106,8 @@
   <template id="photo-tmpl">
     <div class="photo">
       <div class="toolbar">
-        <button class="rotate-l">⤿</button>
-        <button class="rotate-r">⤾</button>
+        <button class="rotate-r">⤿</button>
+        <button class="rotate-l">⤾</button>
         <button class="delete">⨯</button>
       </div>
     </div>
@@ -147,6 +147,9 @@
     const createPhotoElement = params => {
       const el = clone(photoTemplate)
       // console.log(el)
+      el.querySelector('.rotate-l').onclick = rotatePhotoL
+      el.querySelector('.rotate-r').onclick = rotatePhotoR
+      el.querySelector('.delete').onclick = deletePhoto
       el.dataset.sheet = params.sheet
       el.dataset.filename = params.filename
       el.style.backgroundImage =
@@ -228,6 +231,19 @@
       }
     }
 
+    const rotatePhoto = async (e, deg) => {
+      const photo = e.target.closest('.photo')
+      const params = { ...photo.dataset, deg }
+      await fetch(`/photo?${new URLSearchParams(params)}`, { method: 'PATCH' })
+
+      // Reset cache to trigger reload
+      photo.style.backgroundImage =
+        `${photo.style.backgroundImage.slice(0, -2)}&cache=${Date.now()}")`
+    }
+
+    const rotatePhotoL = e => rotatePhoto(e, 90)
+    const rotatePhotoR = e => rotatePhoto(e, 270)
+    const deletePhoto = e => console.log('deleted!!!!')
   </script>
 </body>
 </html>

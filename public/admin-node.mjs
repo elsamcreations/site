@@ -1,8 +1,8 @@
 import { spawn } from 'child_process'
 import { once } from 'events'
-import { readFile, writeFile, readdir, mkdir, stat } from 'fs/promises'
+import { readFile, writeFile, readdir, mkdir, stat, rm } from 'fs/promises'
 import { createServer } from 'http'
-import { basename, dirname, parse as parsePath } from 'path'
+import { basename, dirname } from 'path'
 
 // npm i -g @squoosh/cli
 // apt install libjpeg-progs # (install jpegtran for rotate)
@@ -40,6 +40,7 @@ const spawner = cmd => async (args, options) => {
   const child = spawn(cmd, args, { stdio: 'ignore', ...options })
   const [code] = await once(child, 'close')
   if (!code) return
+  console.log(cmd, ...args)
   throw Error(`${cmd}: fail (${code})`)
 }
 
@@ -47,8 +48,8 @@ const squoosh = spawner('squoosh-cli')
 const jpegtran = spawner('jpegtran')
 
 const rotate = (filepath, deg) => jpegtran([
-  `-rotate ${deg}`,
-  `-outfile ${filepath}`,
+  '-rotate', deg,
+  '-outfile', filepath,
   filepath,
 ])
 
@@ -147,10 +148,17 @@ const serveRequest = async (request) => {
 
       const sheet = params.sheet?.toLowerCase()
       const filename = params.filename?.toLowerCase()
-      // rotate source image
       // delete previously generated sizes
-      await rotate(`${root}/${sheet}/${filename}`)
-      jpegtran -rotate 90 -outfile dscn1422.jpg dscn1422.jpg
+      // list all dirs
+      const content = await readdir(`${root}/${sheet}`, { withFileTypes: true })
+      const subdirs = content.filter(f => f.isDirectory())
+      const deleteWork = subdirs
+        .map(({ name }) => rm(`${root}/${sheet}/${name}/${filename}`, { force: true }))
+
+      await rotate(`${root}/${sheet}/${filename}`, deg)
+      await Promise.all(deleteWork)
+
+      return new Response('ROTATED', { status: 201 })
     }
 
     case 'POST:/photo': {
@@ -160,7 +168,7 @@ const serveRequest = async (request) => {
       const body = await readBody(request)
       const realname = `${sheet}/${filename}`
       await writeFile(`${root}/${realname.toLowerCase()}`, body)
-      return new Response('CREATED\n', { status: 201 })
+      return new Response('CREATED', { status: 201 })
     }
 
     default:
