@@ -1,0 +1,216 @@
+import { spawn } from 'child_process'
+import { once } from 'events'
+import { readFile, writeFile, readdir, mkdir, stat } from 'fs/promises'
+import { createServer } from 'http'
+import { basename, dirname, parse as parsePath } from 'path'
+
+// npm i -g @squoosh/cli
+// apt install libjpeg-progs # (install jpegtran for rotate)
+
+const resizeParams = {
+  enabled: true,
+  width: 1250,
+  height: 1250,
+  method: "lanczos3",
+  fitMethod: "contain",
+  premultiply: true,
+  linearRGB: true,
+}
+
+const compressParams = {
+  quality: 75,
+  baseline: false,
+  arithmetic: false,
+  progressive: true,
+  optimize_coding: true,
+  smoothing: 0,
+  color_space: 3,
+  quant_table: 3,
+  trellis_multipass: false,
+  trellis_opt_zero: false,
+  trellis_opt_table: false,
+  trellis_loops: 1,
+  auto_subsample: true,
+  chroma_subsample: 2,
+  separate_chroma_quality: false,
+  chroma_quality: 75,
+}
+
+const spawner = cmd => async (args, options) => {
+  const child = spawn(cmd, args, { stdio: 'ignore', ...options })
+  const [code] = await once(child, 'close')
+  if (!code) return
+  throw Error(`${cmd}: fail (${code})`)
+}
+
+const squoosh = spawner('squoosh-cli')
+const jpegtran = spawner('jpegtran')
+
+const rotate = (filepath, deg) => jpegtran([
+  `-rotate ${deg}`,
+  `-outfile ${filepath}`,
+  filepath,
+])
+
+const compress = (filepath, size) => squoosh([
+  `-d${size}`,
+  `--resize=${JSON.stringify({
+    ...resizeParams,
+    width: Number(size),
+    height: Number(size),
+  })}`,
+  `--mozjpeg=${JSON.stringify(compressParams)}`,
+  basename(filepath),
+], { cwd: dirname(filepath) })
+
+const root = '/tmp/couette'
+
+const serveRequest = async (request) => {
+  const url = new URL(`http://e${request.url}`)
+  const params = Object.fromEntries(url.searchParams)
+  console.log(request.method, url.pathname, params)
+
+  switch (`${request.method}:${url.pathname}`) {
+
+    case 'GET:/':
+      return new Response(await readFile('./admin.html'))
+
+    case 'GET:/couette': {
+      const couettesList = await readdir(root, { withFileTypes: true })
+        .catch(err => {
+          if (err.code !== 'ENOENT') throw err
+          return []
+        })
+
+      const couettesInfo = couettesList
+        .filter(ent => ent.isDirectory())
+        .map(async ({ name }) => {
+          const sheetDir = `${root}/${name}`
+          const { birthtimeMs: createdAt } = await stat(sheetDir)
+          const content = await readdir(sheetDir)
+          const photos = content.filter(file => /\.(jpg|png)$/i.test(file))
+          const info = content.includes('info.txt')
+            ? await readFile(`${sheetDir}/info.txt`, 'utf8')
+            : ''
+          
+          return { name, info, photos, createdAt }
+        })
+
+      return new Response(JSON.stringify(await Promise.all(couettesInfo)))
+    }
+
+    case 'POST:/couette': {
+      const { sheet } = await readBodyJSON(request)
+      await mkdir(`${root}/${sheet.toLowerCase()}`, { recursive: true })
+      return new Response('CREATED\n', { status: 201 })
+    }
+
+    case 'POST:/info': {
+      const body = await readBodyJSON(request)
+      const sheet = body.sheet?.toLowerCase()
+      await writeFile(`${root}/${sheet}/info.txt`, body.info, 'utf8')
+      return new Response('CREATED\n', { status: 201 })
+    }
+
+    case 'GET:/photo': {
+      const { size } = params
+      if (!size)
+        return new Response('Missing size', { status: 400 })
+
+      const sheet = params.sheet?.toLowerCase()
+      const filename = params.filename?.toLowerCase()
+      const source = `${root}/${sheet}/${filename}`
+      const target = `${root}/${sheet}/${size}/${filename}`
+
+      try {
+        await stat(source)
+        try {
+          return new Response(await readFile(target))
+        } catch (err) {
+          if (err.code !== 'ENOENT') throw err
+          await compress(source, size)
+          return new Response(await readFile(target))
+        }
+      } catch (err) {
+        if (err.code !== 'ENOENT') throw err
+        return new Response(
+          `${url.pathname}?${url.searchParams} Not found`,
+          { status: 404 },
+        )
+      }
+    }
+
+    case 'PATCH:/photo': {
+      const { deg } = params
+      if (!deg)
+        return new Response('Missing deg', { status: 400 })
+
+      const sheet = params.sheet?.toLowerCase()
+      const filename = params.filename?.toLowerCase()
+      // rotate source image
+      // delete previously generated sizes
+      await rotate(`${root}/${sheet}/${filename}`)
+      jpegtran -rotate 90 -outfile dscn1422.jpg dscn1422.jpg
+    }
+
+    case 'POST:/photo': {
+      const { filename, sheet } = params
+      if (!filename)
+        return new Response('Missing filename', { status: 400 })
+      const body = await readBody(request)
+      const realname = `${sheet}/${filename}`
+      await writeFile(`${root}/${realname.toLowerCase()}`, body)
+      return new Response('CREATED\n', { status: 201 })
+    }
+
+    default:
+      return new Response(`${url.pathname} Not found`, { status: 404 })
+  }
+}
+
+class Response {
+  constructor(body, init) {
+    this.body = body
+    this.init = {status:200, ...init}
+  }
+}
+
+async function readBody(req) {
+  const chunks = []
+  for await (const chunk of req) chunks.push(chunk)
+  return Buffer.concat(chunks)
+}
+
+async function readBodyJSON(req) {
+  const buf = await readBody(req)
+  return JSON.parse(buf.toString('utf8'))
+}
+
+const serv = createServer((req, res) => {
+  serveRequest(req)
+    .catch(err => {
+      console.log(err)
+      return new Response(err.stack, { status: 500 })
+    })
+    .then(
+      ({body, init}) => {
+        res.statusCode = init.status
+        res.end(body)
+      }
+    )
+})
+
+serv.listen(8754)
+
+
+/*
+const serveHTTP =  async (conn) => {
+  for await (const { request, respondWith } of Deno.serveHttp(conn)) {
+  serveRequest(request)
+    .catch(err => new Request(err.stack, { status: 500 }))
+    .then(respondWith)
+  }
+}
+
+for await (const conn of Deno.listen({ port: 8754 })) serveHTTP(conn)
+*/

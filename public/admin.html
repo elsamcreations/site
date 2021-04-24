@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+  <meta charset="UTF-8" />
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Couette Manager 2000</title>
+  <style>
+    * {
+      font-size: 16px;
+      font-family: monospace, monospace;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 80ch;
+      margin: 0 auto;
+    }
+
+    h2 {
+      text-transform: capitalize;
+    }
+
+    i { color: #88c }
+
+    button::before { content: '['; color: #ccc }
+    button::after { content: ']'; color: #ccc }
+    button:hover::before,
+    button:hover::after { color: #000 }
+    .toolbar > button:hover::before,
+    .toolbar > button:hover::after { color: #fff }
+    button {
+      border: 0;
+      padding: 0;
+    }
+
+    textarea {
+      resize: vertical;
+      margin: 0;
+      width: 100%;
+      padding: 1ch;
+      background-color: #eee;
+      border: none;
+      margin-bottom: 2ch;
+    }
+
+    form {
+      margin-bottom: 2ch;
+    }
+
+    .couette {
+      padding: 4ch;
+    }
+
+    .photo {
+      width: 17ch;
+      height: 17ch;
+      margin-right: 1ch;
+      margin-bottom: 1ch;
+      overflow: hidden;
+      background-color: #88c;
+      background-size: 100%;
+    }
+
+    .toolbar > button {
+      background: #0008;
+      color: #fff;
+    }
+
+    .toolbar {
+      justify-content: end;
+      display: flex;
+      opacity: 0;
+      transition: opacity 150ms ease-out;
+    }
+
+    .photo:hover > .toolbar { opacity: 1 }
+
+    .photos {
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .add-info, .add-photo { display: none }
+    .add-info, .add-photo { display: none }
+
+    input.edit:checked ~ .add-info,
+    input.edit:checked ~ .add-photo {
+      display: block;
+    }
+
+  </style>
+</head>
+<body>
+
+  <h1>
+    * Couette Manager <i>2000</i> *
+  </h1>
+  <!--
+    - drag & drop?
+    - delete images
+  -->
+  <template id="photo-tmpl">
+    <div class="photo">
+      <div class="toolbar">
+        <button class="rotate-l">⤿</button>
+        <button class="rotate-r">⤾</button>
+        <button class="delete">⨯</button>
+      </div>
+    </div>
+  </template>
+
+  <template id="couette-tmpl">
+    <div class="couette">
+      <h2>couette</h2>
+      <div class="photos"></div>
+      <input class="edit" type="checkbox"><label class="edit-label"> edit</label>
+      <form class='add-info'>
+        <label for="info"><div>Info:</div></label>
+        <div><textarea rows="4" name="info" spellcheck="false"></textarea></div>
+        <button>Save</button>
+      </form>
+
+      <form class='add-photo'>
+        <label>Photo: <input type="file" multiple /></label>
+        <button>Upload</button>
+      </form>
+    </div>
+  </template>
+
+  <hr>
+
+  <form id='add-couette'>
+    <label>Nommage de la couette: <input /></label>
+    <button>Creating</button>
+  </form>
+  <hr>
+
+  <div id="couettes-wrapper"></div>
+  <script type="module">
+    const clone = template =>
+      template.content.firstElementChild.cloneNode(true)
+
+    const createPhotoElement = params => {
+      const el = clone(photoTemplate)
+      // console.log(el)
+      el.dataset.sheet = params.sheet
+      el.dataset.filename = params.filename
+      el.style.backgroundImage =
+        `url(/photo?${new URLSearchParams(params)})`
+
+      return el
+    }
+
+    const createCouetteElements = couette => {
+      const el = clone(couetteTemplate)
+      const editId = `${couette.name}-edit`
+      el.querySelector('h2').textContent = couette.name
+      el.querySelector('textarea').value = couette.info
+      el.querySelector('.edit').id = editId
+      el.querySelector('.edit-label').htmlFor = editId
+      el.querySelector('.add-info').onsubmit = submitInfo
+      el.querySelector('.add-photo').onsubmit = submitPhoto
+      el.querySelector('.photos')
+        .append(...couette.photos.map(filename => {
+          const params = { filename, sheet: couette.name, size: 328 }
+          return createPhotoElement(params)
+        }))
+
+      return el
+    }
+
+    fetch('/couette').then(res => res.json()).then(couettes => {
+      couettesWrapper.append(...couettes
+        .sort((a, b) => b.createdAt - a.createdAt)
+        .map(createCouetteElements)
+      )
+    })
+
+    const addCouette = document.getElementById('add-couette')
+    const photoTemplate = document.getElementById('photo-tmpl')
+    const couetteTemplate = document.getElementById('couette-tmpl')
+    const couettesWrapper = document.getElementById('couettes-wrapper')
+    console.log(photoTemplate)
+    const getSheetName = e => e.target
+      .parentElement
+      .getElementsByTagName('h2')[0]
+      .textContent
+
+    const submitInfo = async e => {
+      e.preventDefault()
+      const [textarea] = e.target
+      const response = await fetch('/info', {
+        method: 'post',
+        body: JSON.stringify({ sheet: getSheetName(e), info: textarea.value })
+      })
+      console.log(response)
+    }
+
+    addCouette.onsubmit = async e => {
+      e.preventDefault()
+      const [input] = e.target
+      const sheet = input.value
+      // TODO: check que le nom existe pas deja
+      const response = await fetch('/couette', {
+        method: 'post',
+        body: JSON.stringify({ sheet })
+      })
+      const couetteData = { name: sheet, photos: [], info: '' }
+      const couetteElement = createCouetteElements(couetteData)
+      couettesWrapper.prepend(couetteElement)
+    }
+
+    const submitPhoto = async e => {
+      e.preventDefault()
+      const [input] = e.target
+      const photosElement = e.target.parentElement.querySelector('.photos')
+      for (const file of input.files) {
+        const params = { sheet: getSheetName(e), filename: file.name }
+        const response = await fetch(`/photo?${new URLSearchParams(params)}`, {
+          method: 'post',
+          body: await file.arrayBuffer(),
+        })
+        photosElement.append(createPhotoElement({ ...params, size: 328 }))
+      }
+    }
+
+  </script>
+</body>
+</html>
