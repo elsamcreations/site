@@ -1,7 +1,6 @@
 import { spawn } from 'child_process'
 import { once } from 'events'
 import { readFile, writeFile, readdir, mkdir, stat, rm } from 'fs/promises'
-import { createServer } from 'http'
 import { basename, dirname } from 'path'
 
 // npm i -g @squoosh/cli
@@ -86,7 +85,7 @@ const serveRequest = async (request) => {
   switch (`${request.method}:${url.pathname}`) {
 
     case 'GET:/':
-      return new Response(await readFile('./admin.html'))
+      return new Response(await readFile(`./admin/index.html`))
 
     case 'GET:/couette': {
       const couettesList = await readdir(root, { withFileTypes: true })
@@ -224,7 +223,19 @@ async function readBodyJSON(req) {
   return JSON.parse(buf.toString('utf8'))
 }
 
-const serv = createServer((req, res) => {
+const serve = async fn => {
+  const cert = await readFile('/etc/oct.ovh.crt').catch(err => err)
+  if (cert instanceof Error) {
+    if (cert.code !== 'ENOENT') throw cert
+    const { createServer } = await import('http')
+    return createServer(fn)
+  }
+
+  const { createServer } = await import('https')
+  return createServer({ cert, key: await readFile('/etc/oct.ovh.key') }, fn)
+}
+
+const server = await serve((req, res) => {
   serveRequest(req)
     .catch(err => {
       console.log(err)
@@ -238,17 +249,4 @@ const serv = createServer((req, res) => {
     )
 })
 
-serv.listen(8754)
-
-
-/*
-const serveHTTP =  async (conn) => {
-  for await (const { request, respondWith } of Deno.serveHttp(conn)) {
-  serveRequest(request)
-    .catch(err => new Request(err.stack, { status: 500 }))
-    .then(respondWith)
-  }
-}
-
-for await (const conn of Deno.listen({ port: 8754 })) serveHTTP(conn)
-*/
+server.listen(2096)
