@@ -136,19 +136,20 @@ const serveRequest = async (request) => {
 
       try {
         await stat(source)
-        try {
-          return new Response(await readFile(target))
-        } catch (err) {
-          if (err.code !== 'ENOENT') throw err
-          await compress(source, size)
-          return new Response(await readFile(target))
-        }
       } catch (err) {
         if (err.code !== 'ENOENT') throw err
         return new Response(
           `${url.pathname}?${url.searchParams} Not found`,
           { status: 404 },
         )
+      }
+
+      try {
+        return new Response(await readFile(target))
+      } catch (err) {
+        if (err.code !== 'ENOENT') throw err
+        await compress(source, size)
+        return new Response(await readFile(target))
       }
     }
 
