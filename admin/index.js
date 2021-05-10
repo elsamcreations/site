@@ -5,7 +5,6 @@ import { basename, dirname } from 'path'
 
 // npm i -g @squoosh/cli
 // apt install libjpeg-progs # (install jpegtran for rotate)
-// apt install build-essential # (install convert (imagemagick) for colors adjustement)
 
 const resizeParams = {
   enabled: true,
@@ -44,23 +43,12 @@ const spawner = cmd => async (args, options) => {
   throw Error(`${cmd}: fail (${code})`)
 }
 
-const convert = spawner('convert')
 const squoosh = spawner('squoosh-cli')
 const jpegtran = spawner('jpegtran')
 
 const rotate = (filepath, deg) => jpegtran([
   '-rotate', deg,
   '-outfile', filepath,
-  filepath,
-])
-
-const enhance = (filepath) => convert([
-  '-modulate', '90,125',
-  '-enhance',
-  // '-equalize',
-  // '-contrast-stretch', '1.0x5%',
-  '-contrast',
-  filepath,
   filepath,
 ])
 
@@ -180,7 +168,6 @@ const serveRequest = async (request) => {
       const body = await readBody(request)
       const realname = `${sheet}/${filename}`
       await writeFile(`${root}/${realname.toLowerCase()}`, body)
-      await enhance(`${root}/${realname.toLowerCase()}`)
       return new Response('CREATED', { status: 201 })
     }
 
