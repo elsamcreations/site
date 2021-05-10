@@ -64,7 +64,7 @@ const compress = (filepath, size) => squoosh([
 ], { cwd: dirname(filepath) })
 
 const root = process.env.COUETTE_DIR || '/tmp/couette'
-
+const couetteCache = {}
 const serveRequest = async (request) => {
   const url = new URL(`http://e${request.url}`)
   const params = Object.fromEntries(url.searchParams)
@@ -136,7 +136,8 @@ const serveRequest = async (request) => {
         return new Response(await readFile(target))
       } catch (err) {
         if (err.code !== 'ENOENT') throw err
-        await compress(source, size)
+        await couetteCache[`${source}/${size}`]
+          || (couetteCache[`${source}/${size}`] = compress(source, size))
         return new Response(await readFile(target))
       }
     }
