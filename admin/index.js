@@ -75,7 +75,7 @@ const compress = (filepath, size) => squoosh([
   basename(filepath),
 ], { cwd: dirname(filepath) })
 
-const root = '/tmp/couette'
+const root = process.env.COUETTE_DIR || '/tmp/couette'
 
 const serveRequest = async (request) => {
   const url = new URL(`http://e${request.url}`)
