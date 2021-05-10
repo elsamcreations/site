@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-
   <meta charset="UTF-8" />
   <link rel="icon"
     href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
@@ -92,6 +91,11 @@
       display: block;
     }
 
+    label, .ui {
+      cursor: default;
+      user-select: none;
+    }
+
   </style>
 </head>
 <body>
@@ -146,12 +150,12 @@
 
     const createPhotoElement = params => {
       const el = clone(photoTemplate)
-      // console.log(el)
       el.querySelector('.rotate-l').onclick = rotatePhotoL
       el.querySelector('.rotate-r').onclick = rotatePhotoR
       el.querySelector('.delete').onclick = deletePhoto
       el.dataset.sheet = params.sheet
       el.dataset.filename = params.filename
+      params.cache = Date.now()
       el.style.backgroundImage =
         `url(/photo?${new URLSearchParams(params)})`
 
@@ -187,7 +191,7 @@
     const photoTemplate = document.getElementById('photo-tmpl')
     const couetteTemplate = document.getElementById('couette-tmpl')
     const couettesWrapper = document.getElementById('couettes-wrapper')
-    console.log(photoTemplate)
+
     const getSheetName = e => e.target
       .parentElement
       .getElementsByTagName('h2')[0]
@@ -243,7 +247,13 @@
 
     const rotatePhotoL = e => rotatePhoto(e, 90)
     const rotatePhotoR = e => rotatePhoto(e, 270)
-    const deletePhoto = e => console.log('deleted!!!!')
+    const deletePhoto = async e => {
+      const photo = e.target.closest('.photo')
+      const params = { ...photo.dataset }
+      await fetch(`/photo?${new URLSearchParams(params)}`, { method: 'DELETE' })
+      photo.remove()
+    }
+
   </script>
 </body>
 </html>
