@@ -3,6 +3,11 @@ import { once } from 'events'
 import { readFile, writeFile, readdir, mkdir, stat, rm } from 'fs/promises'
 import { basename, dirname } from 'path'
 
+// ENV
+const root = process.env.COUETTE_DIR || '/tmp/couette'
+const PWD = process.env.PWD || ''
+
+// DEPENDENCIES
 // npm i -g @squoosh/cli
 // apt install libjpeg-progs # (install jpegtran for rotate)
 
@@ -63,15 +68,16 @@ const compress = (filepath, size) => squoosh([
   basename(filepath),
 ], { cwd: dirname(filepath) })
 
-const root = process.env.COUETTE_DIR || '/tmp/couette'
 const couetteCache = {}
 const serveRequest = async (request) => {
   const url = new URL(`http://e${request.url}`)
   const params = Object.fromEntries(url.searchParams)
+  const slashPos = url.pathname.indexOf('/', 1)
+  const pwd = url.pathname.slice(1, slashPos)
+  if (pwd !== PWD) return new Response(null, { status: 403 })
+
   console.log(request.method, url.pathname, params)
-
-  switch (`${request.method}:${url.pathname}`) {
-
+  switch (`${request.method}:${url.pathname.slice(slashPos)}`) {
     case 'GET:/':
       return new Response(await readFile(`./admin/index.html`))
 
@@ -102,20 +108,19 @@ const serveRequest = async (request) => {
     case 'POST:/couette': {
       const { sheet } = await readBodyJSON(request)
       await mkdir(`${root}/${sheet.toLowerCase()}`, { recursive: true })
-      return new Response('CREATED\n', { status: 201 })
+      return new Response(null, { status: 201 })
     }
 
     case 'POST:/info': {
       const body = await readBodyJSON(request)
       const sheet = body.sheet?.toLowerCase()
       await writeFile(`${root}/${sheet}/info.txt`, body.info, 'utf8')
-      return new Response('CREATED\n', { status: 201 })
+      return new Response(null, { status: 201 })
     }
 
     case 'GET:/photo': {
       const { size } = params
-      if (!size)
-        return new Response('Missing size', { status: 400 })
+      if (!size) return new Response('Missing size', { status: 400 })
 
       const sheet = params.sheet?.toLowerCase()
       const filename = params.filename?.toLowerCase()
@@ -136,16 +141,15 @@ const serveRequest = async (request) => {
         return new Response(await readFile(target))
       } catch (err) {
         if (err.code !== 'ENOENT') throw err
-        await couetteCache[`${source}/${size}`]
-          || (couetteCache[`${source}/${size}`] = compress(source, size))
+        await (couetteCache[`${source}/${size}`] ||
+          (couetteCache[`${source}/${size}`] = compress(source, size)))
         return new Response(await readFile(target))
       }
     }
 
     case 'PATCH:/photo': {
       const { deg } = params
-      if (!deg)
-        return new Response('Missing deg', { status: 400 })
+      if (!deg) return new Response('Missing deg', { status: 400 })
 
       const sheet = params.sheet?.toLowerCase()
       const filename = params.filename?.toLowerCase()
@@ -159,23 +163,21 @@ const serveRequest = async (request) => {
       await rotate(`${root}/${sheet}/${filename}`, deg)
       await Promise.all(deleteWork)
 
-      return new Response('ROTATED', { status: 201 })
+      return new Response(null, { status: 201 })
     }
 
     case 'POST:/photo': {
       const { filename, sheet } = params
-      if (!filename)
-        return new Response('Missing filename', { status: 400 })
+      if (!filename) return new Response('Missing filename', { status: 400 })
       const body = await readBody(request)
       const realname = `${sheet}/${filename}`
       await writeFile(`${root}/${realname.toLowerCase()}`, body)
-      return new Response('CREATED', { status: 201 })
+      return new Response(null, { status: 201 })
     }
 
     case 'DELETE:/photo': {
       const { filename, sheet } = params
-      if (!filename)
-        return new Response('Missing filename', { status: 400 })
+      if (!filename) return new Response('Missing filename', { status: 400 })
 
       const sheetDir = `${root}/${sheet.toLowerCase()}`
       const content = await readdir(sheetDir, { withFileTypes: true })
@@ -197,7 +199,7 @@ const serveRequest = async (request) => {
 class Response {
   constructor(body, init) {
     this.body = body
-    this.init = {status:200, ...init}
+    this.init = { status: 200, ...init }
   }
 }
 

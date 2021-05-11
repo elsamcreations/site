@@ -100,9 +100,6 @@
 </head>
 <body>
 
-  <h1>
-    * Couette Manager <i>2000</i> *
-  </h1>
   <!--
     - drag & drop?
     - delete images
@@ -135,16 +132,38 @@
     </div>
   </template>
 
+  <h1>
+    * Couette Manager <i>2000</i> *
+  </h1>
   <hr>
 
   <form id='add-couette'>
     <label>Nommage de la couette: <input /></label>
-    <button>Creating</button>
+    <button>Create</button>
   </form>
   <hr>
 
   <div id="couettes-wrapper"></div>
   <script type="module">
+    const API = async (url, options) => {
+      const res = await fetch(url, options)
+      if (res.ok) return res.status === 200 ? res.json() : null
+      let err = Error((await res.text()).trim() || res.statusText)
+      err.status = res.status
+      err.statusText = res.statusText
+      throw err
+    }
+
+    const { POST, PATCH, GET, DELETE } = new Proxy({}, {
+      get: (_, method) => new Proxy({}, {
+        get: (_, url) => ({ params, body } = {}) => {
+          params && (url += `?${new URLSearchParams(params)}`)
+          body && !(body instanceof ArrayBuffer) && (body = JSON.stringify(body))
+          return API(url, { method, body })
+        }
+      })
+    })
+
     const clone = template =>
       template.content.firstElementChild.cloneNode(true)
 
@@ -157,7 +176,7 @@
       el.dataset.filename = params.filename
       params.cache = Date.now()
       el.style.backgroundImage =
-        `url(/photo?${new URLSearchParams(params)})`
+        `url(photo?${new URLSearchParams(params)})`
 
       return el
     }
@@ -180,7 +199,7 @@
       return el
     }
 
-    fetch('/couette').then(res => res.json()).then(couettes => {
+    GET.couette().then(couettes => {
       couettesWrapper.append(...couettes
         .sort((a, b) => b.createdAt - a.createdAt)
         .map(createCouetteElements)
@@ -200,11 +219,7 @@
     const submitInfo = async e => {
       e.preventDefault()
       const [textarea] = e.target
-      const response = await fetch('/info', {
-        method: 'post',
-        body: JSON.stringify({ sheet: getSheetName(e), info: textarea.value })
-      })
-      console.log(response)
+      await POST.info({ sheet: getSheetName(e), info: textarea.value })
     }
 
     addCouette.onsubmit = async e => {
@@ -212,10 +227,7 @@
       const [input] = e.target
       const sheet = input.value
       // TODO: check que le nom existe pas deja
-      const response = await fetch('/couette', {
-        method: 'post',
-        body: JSON.stringify({ sheet })
-      })
+      await POST.couette({ sheet })
       const couetteData = { name: sheet, photos: [], info: '' }
       const couetteElement = createCouetteElements(couetteData)
       couettesWrapper.prepend(couetteElement)
@@ -227,18 +239,14 @@
       const photosElement = e.target.parentElement.querySelector('.photos')
       for (const file of input.files) {
         const params = { sheet: getSheetName(e), filename: file.name }
-        const response = await fetch(`/photo?${new URLSearchParams(params)}`, {
-          method: 'post',
-          body: await file.arrayBuffer(),
-        })
+        await POST.photo({ params, body: await file.arrayBuffer() })
         photosElement.append(createPhotoElement({ ...params, size: 328 }))
       }
     }
 
     const rotatePhoto = async (e, deg) => {
       const photo = e.target.closest('.photo')
-      const params = { ...photo.dataset, deg }
-      await fetch(`/photo?${new URLSearchParams(params)}`, { method: 'PATCH' })
+      await PATCH.photo({ params: { ...photo.dataset, deg } })
 
       // Reset cache to trigger reload
       photo.style.backgroundImage =
@@ -249,8 +257,7 @@
     const rotatePhotoR = e => rotatePhoto(e, 270)
     const deletePhoto = async e => {
       const photo = e.target.closest('.photo')
-      const params = { ...photo.dataset }
-      await fetch(`/photo?${new URLSearchParams(params)}`, { method: 'DELETE' })
+      await DELETE.photo({ params: { ...photo.dataset } })
       photo.remove()
     }
 
