@@ -94,7 +94,12 @@ const serveRequest = async (request) => {
           const sheetDir = `${root}/${name}`
           const { birthtimeMs: createdAt } = await stat(sheetDir)
           const content = await readdir(sheetDir)
-          const photos = content.filter(file => /\.(jpg|png)$/i.test(file))
+          const images = content.filter(file => /\.(jpg|png)$/i.test(file))
+          const stats = await Promise.all(images.map(async path => [
+            path,
+            (await stat(`${sheetDir}/${path}`)).mtimeMs,
+          ]))
+          const photos = stats.sort((a, b) => b[1] - a[1]).map(s => s[0])
           const info = content.includes('info.txt')
             ? await readFile(`${sheetDir}/info.txt`, 'utf8')
             : ''
