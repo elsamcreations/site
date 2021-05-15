@@ -261,7 +261,10 @@ const sheetMaker =  (couette) => {
     resetCurrent = reset
   }
 
-  slider.onmousedown = (e) => start(e.x)
+  slider.onmousedown = (e) => {
+    e.preventDefault()
+    start(e.x)
+  }
   slider.onmousemove = (e) => startX && e.buttons && move(x = e.x)
   slider.ontouchmove = (e) => {
     if (!startX) return
