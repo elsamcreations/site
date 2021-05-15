@@ -99,14 +99,16 @@ https://media.discordapp.net/attachments/315112005591760896/837745244245065788/D
   flex-shrink: 0;
   display: flex;
   align-items: end;
-  gap: 2px;
 }
 
 .sheet .slider {
   display: flex;
   margin-bottom: 2px;
-  transition: transform 200ms cubic-bezier(.23,1,.32,1);
   user-drag: none;
+}
+
+.sheet .slider.smooth {
+  transition: transform 200ms cubic-bezier(.23,1,.32,1);
 }
 
 .sheet .slider div {
@@ -119,13 +121,15 @@ https://media.discordapp.net/attachments/315112005591760896/837745244245065788/D
 }
 
 .sheet:active, .sheet:focus-within {
-  outline: 5px solid;
+  box-shadow: 0 0 15px 3px;
+  outline: 3px solid #64e2fa;
 }
 
 .sheet input[type="radio"] {
   opacity: 0;
   position: fixed;
 }
+
 .sheet label {
   height: 46px;
   width: 100%;
@@ -138,6 +142,8 @@ https://media.discordapp.net/attachments/315112005591760896/837745244245065788/D
   height: 100%;
   background-size: cover;
   background-position: center;
+  outline: 1px solid black;
+  outline-offset: -1px;
 }
 
 @media screen and (max-width: 1400px) {
@@ -158,7 +164,7 @@ https://media.discordapp.net/attachments/315112005591760896/837745244245065788/D
   <section id="sheets">
     <template id="sheet">
       <div class="sheet">
-        <div class="slider"></div>
+        <div class="slider smooth"></div>
         <div class="previews"></div>
       </div>
     </template>
@@ -187,6 +193,45 @@ https://media.discordapp.net/attachments/315112005591760896/837745244245065788/D
   <footer></footer>
 
 <script type="module">
+// LIB
+// create an observable or event
+const eve = (...args) => {
+  const subs = new Set()
+  const sub = (fn) => (subs.add(fn), () => subs.delete(fn))
+  const next = () => new Promise(once)
+  const once = (fn) =>
+    subs.add(function $(value, prev) {
+      subs.delete($)
+      fn(value, prev)
+    })
+
+  // If no arguments are passed, this is an simple event
+  if (!args.length) {
+    const trigger = (value) => {
+      for (const fn of subs) fn(value)
+    }
+    return { next, once, on: sub, trigger }
+  }
+
+  // Otherwhise it's an observable with `set`, `get` and `map`
+  // additional methods
+  let [data] = args
+  const get = () => data
+  const on = (fn) => (fn(data), sub(fn))
+  const set = (next) => {
+    if (next === data) return
+    const prev = data
+    data = next
+    for (const fn of subs) fn(next, prev)
+  }
+  const map = (fn) => {
+    const { set, ...obs } = eve(fn(get()))
+    on((data) => set(fn(data)))
+    return obs
+  }
+  return { map, once, next, get, set, on }
+}
+
 const templatesEntries =
   [...document.getElementsByTagName('template')].map(t => {
     const elem = t.content.firstElementChild
@@ -196,19 +241,22 @@ const templatesEntries =
 const makeImageUrl = (filename, sheet) => 
   `url(https://dev.oct.ovh:2096/wow/photo?filename=${filename}&sheet=${sheet}&size=328)`
 
+const X = eve(0)
+const buttons = eve(0)
+const updateMouseState =  e => {
+  X.set(e.x)
+  buttons.set(e.buttons)
+}
 
-let resetCurrent
-addEventListener('mousemove', e => {
-  if (e.buttons || !resetCurrent) return
-  setTimeout(resetCurrent)
-})
+window.addEventListener('mousemove', updateMouseState, false)
+window.addEventListener('mousedown', updateMouseState, false)
+window.addEventListener('touchmove', e => X.set(e.touches[0].pageX), false)
+
+setTimeout(() => console.log(X.get()), 2000)
 const sheetMaker =  (couette) => {
   if (!couette.photos.length) return ''
   const sheet = templates.sheet()
   sheet.id = couette.name
-
-  // TODO: change how the file is hosted
-  // sheet.onmouseup = () => sheet.firstElementChild.focus()
 
   const [previews] = sheet.getElementsByClassName('previews')
   const [slider] = sheet.getElementsByClassName('slider')
@@ -228,61 +276,6 @@ const sheetMaker =  (couette) => {
     return label
   })
 
-  let offset = 0
-  let width = 324
-  let time = 0
-  let startX, startY, x
-  const move = () => slideTo(((x - startX)/width)*100 + offset)
-
-  slider.onmouseup = slider.ontouchend = slider.ontouchcancel = () => {
-    let dist = startX - x || 0
-    let delay = Date.now() - time
-    if (Math.abs(dist) < 20 && delay < 250) {
-      const dir = Math.sign((startX - slider.offsetLeft) - width / 2)
-      const input = inputs[(-offset)/100 + dir]
-      console.log({dir, input})
-      input && input.click()
-    }
-
-    if (!reset() && Math.abs(dist) < (width / 3) - Math.max(250 - delay, 0)) return
-    const input = inputs[(-offset)/100 + Math.sign(dist)]
-    input && input.click()
-  }
-
-  const reset = () => {
-    if (!startX) return true
-    x = startX = resetCurrent = undefined
-    slideTo(offset)
-  }
-
-  const start = (initX) => {
-    startX = initX
-    time = Date.now()
-    resetCurrent = reset
-  }
-
-  slider.onmousedown = (e) => {
-    e.preventDefault()
-    start(e.x)
-  }
-  slider.onmousemove = (e) => startX && e.buttons && move(x = e.x)
-  slider.ontouchmove = (e) => {
-    if (!startX) return
-    let y = e.touches[0].pageY
-    x = e.touches[0].pageX
-    if (Math.abs(startX - x) > Math.abs(startY - y)) {
-      move()
-      e.preventDefault()
-    } else {
-      startX = undefined
-    }
-  }
-
-  slider.ontouchstart = (e) => {
-    startY = e.touches[0].pageY
-    start(e.touches[0].pageX)
-  }
-
   slider.append(...couette.photos.map((href, i) => {
     const image = document.createElement('div')
     const url = makeImageUrl(href, couette.name)
@@ -292,6 +285,76 @@ const sheetMaker =  (couette) => {
 
   previews.append(...inputs)
 
+  // handle slide
+  let offset = 0
+  let width = 324
+  let time = 0
+  let startX, startY
+  const release = () => {
+    if (!startX) return
+    const dist = startX - X.get() || 0
+    const delay = Date.now() - time
+    if (Math.abs(dist) < 20 && delay < (width * 0.8)) {
+      const dir = Math.sign((startX - slider.offsetLeft) - width / 2)
+      const input = inputs[(-offset)/100 + dir]
+      stop()
+      return input && input.click()
+    }
+
+    stop()
+    if (Math.abs(dist) < (width / 3) - Math.max((width * 0.8) - delay, 0)) return
+    const input = inputs[(-offset)/100 + Math.sign(dist)]
+    input && input.click()
+  }
+
+  const stop = () => {
+    if (!startX) return true
+    startX = undefined
+    slider.classList.add('smooth')
+    slideTo(offset)
+  }
+
+  const start = (initX) => {
+    width = slider.clientWidth
+    startX = initX
+    time = Date.now()
+    slider.classList.remove('smooth')
+  }
+
+  const max = (couette.photos.length-1) * -100
+  buttons.on(btn => btn || (startX && release()))
+  X.on(x => {
+    if (!startX) return
+    const diff = (x - startX)/width
+    if (!offset && diff > 0) {
+      slideTo((diff / (diff + 4))*100 + offset)
+    } else if (max >= offset && diff < 0) {
+      slideTo((-diff / (-diff + 4))*-100 + offset)
+    } else {
+      slideTo(diff*100 + offset)
+    }
+  })
+
+  slider.onmousedown = (e) => {
+    if (startY) return
+    e.preventDefault()
+    start(e.x)
+  }
+
+  slider.ontouchmove = (e) => {
+    if (!startX) return
+    Math.abs(startX - X.get()) > Math.abs(startY - e.touches[0].pageY)
+      ? e.preventDefault()
+      : stop()
+  }
+
+  slider.onmouseup = slider.ontouchend = slider.ontouchcancel = release
+  slider.ontouchstart = (e) => {
+    startY = e.touches[0].pageY
+    start(e.touches[0].pageX)
+  }
+
+  sheet.onmouseup = () => sheet.firstElementChild.focus()
   return sheet
 }
 
