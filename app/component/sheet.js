@@ -1,3 +1,4 @@
+import './sheet.css'
 import { templates, buttons, X } from '../state.js'
 
 const makeImageUrl = (filename, sheet) => 
