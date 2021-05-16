@@ -199,13 +199,6 @@
       return el
     }
 
-    GET.couette().then(couettes => {
-      couettesWrapper.append(...couettes
-        .sort((a, b) => b.createdAt - a.createdAt)
-        .map(createCouetteElements)
-      )
-    })
-
     const addCouette = document.getElementById('add-couette')
     const photoTemplate = document.getElementById('photo-tmpl')
     const couetteTemplate = document.getElementById('couette-tmpl')
@@ -222,16 +215,33 @@
       await POST.info({ body: { sheet: getSheetName(e), info: textarea.value } })
     }
 
-    addCouette.onsubmit = async e => {
-      e.preventDefault()
-      const [input] = e.target
-      const sheet = input.value
-      // TODO: check que le nom existe pas deja
-      await POST.couette({ body: { sheet } })
-      const couetteData = { name: sheet, photos: [], info: '' }
-      const couetteElement = createCouetteElements(couetteData)
-      couettesWrapper.prepend(couetteElement)
-    }
+    GET.couette().then(couettes => {
+      couettesWrapper.append(...couettes
+        .sort((a, b) => b.createdAt - a.createdAt)
+        .map(createCouetteElements)
+      )
+
+      addCouette.onsubmit = async e => {
+        e.preventDefault()
+        const [input] = e.target
+        const sheet = input.value
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/-/g, ' ')
+          .replace(/[^a-z0-9 ]/g, '')
+          .trim()
+          .replace(/\s+/g, '-')
+
+        if (!sheet.length) return // TODO: show error maybe ?
+        if (couettes.find(c => c.name === sheet)) return
+
+        await POST.couette({ body: { sheet } })
+        const couetteData = { name: sheet, photos: [], info: '' }
+        const couetteElement = createCouetteElements(couetteData)
+        couettesWrapper.prepend(couetteElement)
+        input.value = ''
+      }
+    })
 
     const submitPhoto = async e => {
       e.preventDefault()
