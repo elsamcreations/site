@@ -8,7 +8,7 @@ sharp.cache(false)
 
 // ENV
 const root = process.env.COUETTE_DIR || './couette'
-const SECRET_PATH = process.env.SECRET_PATH || 'admin'
+const PWD = process.env.SECRET_PATH || 'admin'
 
 const rotate = async (filepath, deg) => {
   const buff = await sharp(filepath).rotate(Number(deg)).toBuffer()
@@ -24,20 +24,20 @@ const compress = async (filepath, size, target) => {
     .toFile(target)
 }
 
+const CORS = { headers: { 'Access-Control-Allow-Origin': '*' } }
 const couetteCache = {}
 const serveRequest = async (request) => {
   const url = new URL(`http://e${request.url}`)
   const params = Object.fromEntries(url.searchParams)
   const slashPos = url.pathname.indexOf('/', 1)
   const pwd = url.pathname.slice(1, slashPos)
-  if (request.method !== 'GET' && pwd !== PWD) {
-    return new Response(null, { status: 403 })
-  }
-
-  console.log(request.method, url.pathname, params)
-  switch (`${request.method}:${url.pathname.slice(slashPos)}`) {
+  const safe = request.method === 'GET'
+  if (!safe && pwd !== PWD) return new Response(null, { status: 403 })
+  const route = `${request.method}:${url.pathname.slice(slashPos)}`
+  console.log(route, params)
+  switch (route) {
     case 'GET:/':
-      return new Response(await readFile(`./admin/index.html`))
+      return new Response(await readFile(`./admin/index.html`), CORS)
 
     case 'GET:/couette': {
       const couettesList = await readdir(root, { withFileTypes: true })
@@ -65,7 +65,8 @@ const serveRequest = async (request) => {
           return { name, info, photos, createdAt }
         })
 
-      return new Response(JSON.stringify(await Promise.all(couettesInfo)))
+      const body = JSON.stringify(await Promise.all(couettesInfo))
+      return new Response(body, CORS)
     }
 
     case 'POST:/couette': {
@@ -194,7 +195,8 @@ const server = await serve(async (req, res) => {
     console.log(err)
     return new Response(err.stack, { status: 500 })
   })
-  res.statusCode = init.status
+
+  res.writeHead(init.status, init.headers)
   res.end(body)
 })
 
