@@ -37,26 +37,31 @@ section {
   position: relative;
 }
 
-section:before {
+section > i:before {
   font-size: 400px;
   display: inline-block;
-  position: absolute;
-  margin-left: 0.15em;
   color: #0004;
-  top: -0.25em;
   text-align: center;
   width: 1em;
   font-family: 'Permanent Marker';
   pointer-events: none;
 }
 
-#sheets:before { content: '1' }
+section > i {
+  display: inline-block;
+  top: -100px;
+  position: absolute;
+  width: calc(100% - 140px);
+  overflow: hidden;
+}
+
+#sheets > i:before { content: '1' }
 #sheets { background: #fe8 }
 
-#type:before { content: '2' }
+#type > i:before { content: '2' }
 #type { background: #8ef }
 
-#checkout:before { content: '3' }
+#checkout > i:before { content: '3' }
 #checkout { background: #f8e }
 
 /*
@@ -69,5 +74,8 @@ https://media.discordapp.net/attachments/315112005591760896/837745244245065788/D
 @media screen and (max-width: 1400px) {
   header, section {
     padding: 120px calc(max(35px, 10%));
+  }
+  section > i {
+    width: calc(100% - max(35px, 10%));
   }
 }
