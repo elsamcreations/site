@@ -12,7 +12,7 @@ const result = buildSync({
 
 const index = readFileSync('template/index.html', 'utf8')
 const replaced = index.replace(
-  /<!-- (.*)\[(.*)\](.*) -->/g,
+  /<!-- (.*)\[(.*)\](.*) -->\n(.*\n)/g,
   (_, open, path, close) => `${open}${readFileSync(path, 'utf8')}${close}`,
 )
 
