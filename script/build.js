@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync } from 'fs'
-import { build } from 'esbuild'
+import { buildSync } from 'esbuild'
 
-const result = await build({
+const result = buildSync({
   entryPoints: ['app/index.js'],
   outdir: 'public/assets',
   format: 'esm',
