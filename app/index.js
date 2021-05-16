@@ -1,8 +1,8 @@
 import './style.css'
 import { Sheet } from './component/sheet.js'
 
-const couettes = [{"name":"action-man","info":"","photos":["dscn1402.jpg","dscn1407.jpg","dscn1409.jpg","dscn1406.jpg","dscn1405.jpg","dscn1404.jpg","dscn1403.jpg"],"createdAt":1621190880034.7405},{"name":"ddp","info":"","photos":["dscn1401.jpg","dscn1397.jpg","dscn1398.jpg","dscn1400.jpg","dscn1399.jpg","dscn1396.jpg"],"createdAt":1621190820879.7673},{"name":"digimon","info":"","photos":["dscn1422.jpg","dscn1421.jpg","dscn1420.jpg","dscn1419.jpg"],"createdAt":1621190648214.7617},{"name":"les-101-dalamatiens","info":"","photos":["dscn1394.jpg","dscn1392.jpg","dscn1395.jpg","dscn1393.jpg"],"createdAt":1621190996572.6948},{"name":"nemo","info":"","photos":["dscn1375.jpg","dscn1378.jpg","dscn1377.jpg","dscn1376.jpg","dscn1374.jpg","dscn1373.jpg"],"createdAt":1621189792454.7737},{"name":"om","info":"","photos":["dscn1412.jpg","dscn1414.jpg","dscn1413.jpg","dscn1411.jpg","dscn1410.jpg"],"createdAt":1621190598559.694},{"name":"oui-oui","info":"","photos":["dscn1384.jpg","dscn1383.jpg","dscn1382.jpg","dscn1381.jpg","dscn1380.jpg","dscn1379.jpg"],"createdAt":1621189255192.6692},{"name":"petit-ours-brun","info":"","photos":["dscn1434.jpg","dscn1438.jpg","dscn1436.jpg","dscn1435.jpg"],"createdAt":1621190550104.6038},{"name":"pirates-des-caraibes","info":"","photos":["dscn1416.jpg","dscn1418.jpg","dscn1417.jpg","dscn1415.jpg"],"createdAt":1621190343620.4768},{"name":"princesses","info":"","photos":["dscn1424.jpg","dscn1426.jpg","dscn1425.jpg","dscn1423.jpg"],"createdAt":1621190479617.9265},{"name":"teletubbies","info":"","photos":["dscn1370.jpg","dscn1372.jpg","dscn1371.jpg","dscn1369.jpg"],"createdAt":1621189094579.5693},{"name":"tintin-3d","info":"","photos":["dscn1389.jpg","dscn1391.jpg","dscn1390.jpg"],"createdAt":1621190407447.2803},{"name":"winnie-l-ourson","info":"","photos":["dscn1385.jpg","dscn1388.jpg","dscn1387.jpg","dscn1386.jpg"],"createdAt":1621191045303.8315}]
-
-document
-  .querySelector('#sheets > article')
-  .append(...couettes.map(Sheet))
+fetch('https://dev.oct.ovh:2096/x/couettes')
+  .then((res) => res.json())
+  .then((couettes) => document
+    .querySelector('#sheets > article')
+    .append(...couettes.map(Sheet)))

@@ -2,7 +2,7 @@ import './sheet.css'
 import { templates, buttons, X } from '../state.js'
 
 const makeImageUrl = (filename, sheet) => 
-  `url(https://dev.oct.ovh:2096/wow/photo?filename=${filename}&sheet=${sheet}&size=328)`
+  `url(https://dev.oct.ovh:2096/x/photo?filename=${filename}&sheet=${sheet}&size=328)`
 
 const slideTo = (slider, n) => slider.style.transform = `translate(${n}%)`
 
@@ -48,6 +48,7 @@ export const Sheet = (couette) => {
     const dist = startX - X.get() || 0
     const delay = Date.now() - time
     if (Math.abs(dist) < 20 && delay < (width * 0.8)) {
+      console.log({ startX, offset: slider.offsetLeft, diff: startX - slider.offsetLeft, w: width /2 })
       const dir = Math.sign((startX - slider.offsetLeft) - width / 2)
       const input = inputs[(-offset)/100 + dir]
       stop()

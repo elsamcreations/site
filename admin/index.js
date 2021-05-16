@@ -30,7 +30,9 @@ const serveRequest = async (request) => {
   const params = Object.fromEntries(url.searchParams)
   const slashPos = url.pathname.indexOf('/', 1)
   const pwd = url.pathname.slice(1, slashPos)
-  if (pwd !== PWD) return new Response(null, { status: 403 })
+  if (request.method !== 'GET' && pwd !== PWD) {
+    return new Response(null, { status: 403 })
+  }
 
   console.log(request.method, url.pathname, params)
   switch (`${request.method}:${url.pathname.slice(slashPos)}`) {
