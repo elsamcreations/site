@@ -2,6 +2,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": ""
+    "build": "node script/build.js",
+    "start": "node script/serve.js"
+  },
+  "dependencies": {
+    "esbuild": "^0.11.22"
   }
 }

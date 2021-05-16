@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Give a Sheet</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👕</text></svg>">
+  <!-- <style>[public/assets/index.css]</style> -->
+  <link rel="stylesheet" href="/public/index.css">
+</head>
+<body>
+  <header>
+    <h1>Give a Sheet</h1>
+    <ol>
+      <li>Give a Sheet</li>
+      <li>Get a Shirt</li>
+    </ol>
+  </header>
+  <section id="sheets">
+    <template id="sheet">
+      <div class="sheet">
+        <div class="slider smooth"></div>
+        <div class="previews"></div>
+      </div>
+    </template>
+    <template id="preview">
+      <label>
+        <input type="radio">
+        <div class="preview"></div>
+      </label>
+    </template>
+    <div><h2>Pick your Sheet</h2></div>
+  </section>
+
+  <section id="type">
+    <div><h2>Choose your Clothing</h2></div>
+  </section>
+
+  <section id="checkout">
+    <div><h2>Configure and Checkout</h2></div>
+  </section>
+
+  <footer></footer>
+  <!-- <script type="module">[public/assets/index.js]</script> -->
+  <script type="module" src="/js/index.js"></script>
+</body>
+</html>
+
+<!--
+<script src="https://js.stripe.com/v3"></script>
+<script>
+let stripe = Stripe('pk_test_51IinC4DDpZZcA4TdpugUkXBcmtRRtVdJzNS1848tKPzfwOSKtk38oERfhRs2O4KEDBAfLZcuphK7aUQwXcQOMj2J00UTM90XhD')
+
+function setStripe(id, items) {
+  document.getElementById(id).addEventListener('click', function () {
+    stripe.redirectToCheckout({
+      items: items,
+      successUrl: 'https://traitedelutherie.com/success',
+      cancelUrl: 'https://traitedelutherie.com/canceled',
+    })
+    .then(function (result) {
+      if (result.error) {
+        let displayError = document.getElementById('error-message')
+        displayError.textContent = result.error.message
+      }
+    })
+  })
+}
+
+setStripe('checkout-button-230', [
+  {sku: 'sku_EnciNWzNmYYbh8', quantity: 1},
+  {sku: 'sku_EnclvkJ8hiu8Iz', quantity: 1},
+])
+
+setStripe('checkout-button-215', [
+  {sku: 'sku_EnciNWzNmYYbh8', quantity: 1},
+  //{sku: 'sku_EnclvkJ8hiu8Iz', quantity: 1},
+])
+-->
