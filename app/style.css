@@ -26,15 +26,33 @@ body, html {
   font-size: 22px;
 }
 
-h1 { border-bottom: 10px solid }
-
-header, section {
-  padding: 120px 140px;
+button {
+  font-size: 32px;
+  font-variant: small-caps;
+  border: 4px solid black;
+  padding: 15px 28px;
+  background: inherit;
+  font-weight: bold;
+  box-shadow: 5px 5px 0 0 #0008;
+  white-space: nowrap;
+  letter-spacing: -1px;
 }
 
+button:focus, button:hover {
+  outline: 4px dashed #0008;
+  outline-offset: -12px;
+}
+
+h1 { border-bottom: 10px solid }
+
 section {
+  padding: 40px 0;
   min-height: 400px;
   position: relative;
+}
+
+section > article, header, footer {
+  margin: 0 calc(min(140px, 10%));
 }
 
 section > i:before {
@@ -51,7 +69,7 @@ section > i {
   display: inline-block;
   top: -100px;
   position: absolute;
-  width: calc(100% - 140px);
+  width: 100%;
   overflow: hidden;
 }
 
@@ -70,12 +88,3 @@ https://media.discordapp.net/attachments/315112005591760896/841307475785416754/D
 https://media.discordapp.net/attachments/315112005591760896/841307481044287528/DSCN1454.JPG?width=959&height=719
 https://media.discordapp.net/attachments/315112005591760896/837745244245065788/DSCN1446.JPG?width=959&height=719
 */
-
-@media screen and (max-width: 1400px) {
-  header, section {
-    padding: 120px calc(max(35px, 10%));
-  }
-  section > i {
-    width: calc(100% - max(35px, 10%));
-  }
-}

@@ -12,8 +12,7 @@
 }
 
 .sheet {
-  max-width: 328px;
-  width: 100%;
+  width: 328px;
   border: solid;
   overflow: hidden;
 }
@@ -34,18 +33,24 @@
   transition: transform 200ms cubic-bezier(.23,1,.32,1);
 }
 
+.sheet .slider div,
+.sheet .preview,
+#sheets .bottom-bar .image {
+  background-size: cover;
+  background-position: center;
+  filter: saturate(1.3);
+}
+
 .sheet .slider div {
-  background-size: 100%;
-  background-repeat: no-repeat;
   flex-shrink: 0;
   width: 100%;
   padding-top: calc(min(100%, 328px));
   box-shadow: black 0 0 0 1px inset;
-  filter: saturate(1.3);
 }
 
-.sheet:active, .sheet:focus-within {
-  box-shadow: 0 0 15px 3px;
+.sheet:active,
+.sheet:focus-within {
+  box-shadow: 7px 7px 0 0 #0008;
   outline: 3px solid #64e2fa;
 }
 
@@ -64,9 +69,6 @@
 .sheet .preview {
   width: 100%;
   height: 100%;
-  background-size: cover;
-  background-position: center;
-  filter: saturate(1.3);
   outline: 1px solid black;
   outline-offset: -1px;
 }
@@ -76,18 +78,35 @@
   position: sticky;
   z-index: 10;
   bottom: 0;
-  background-image: linear-gradient(transparent 20%, #fe8 50%);
-  height: 140px;
+  background-image: linear-gradient(transparent 0%, #fe8 40%);
+  height: 220px;
   display: flex;
   align-items: flex-end;
-  width: 100vw;
-  margin-left: -165px;
-  padding: 20px 165px;
+  padding: 20px calc(min(140px, 10%));
+  justify-content: space-between;
 }
 
-@media screen and (max-width: 1400px) {
-  #sheets .bottom-bar {
-    margin-left: calc(max(35px, 10%) * -1 - 4px);
-    padding: 20px calc(max(35px, 10%) + 4px);
-  }
+#sheets .bottom-bar .image {
+  height: 140px;
+  width: 140px;
+  box-shadow: 7px 7px 0 0 #0008, black 0 0 0 2px inset;
+  outline: 3px solid #64e2fa;
+  background-color: #000;
+}
+
+#sheets article {
+  margin-right: calc(min(140px, 10%) - 24px);
+}
+
+@media screen and (max-width: 1320px) {
+  .sheet { width: calc(33.333% - 24px) }
+}
+
+@media screen and (max-width: 900px) {
+  .sheet { width: calc(50% - 24px) }
+}
+
+@media screen and (max-width: 600px) {
+  #sheets article { margin-right: calc(min(140px, 10%)) }
+  .sheet { width: 100% }
 }
