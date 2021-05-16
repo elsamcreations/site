@@ -1,8 +1,8 @@
 import { serve } from 'esbuild'
 
-const server = await serve({ servedir: 'public' }, {
+const server = await serve({ servedir: 'template' }, {
   entryPoints: ['app/index.js'],
-  outdir: 'public/assets',
+  outdir: 'template/assets',
   bundle: true,
 })
 
