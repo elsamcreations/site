@@ -6,6 +6,7 @@
     "start": "node script/serve.js"
   },
   "dependencies": {
-    "esbuild": "^0.11.22"
+    "esbuild": "^0.11.22",
+    "sharp": "^0.27.2"
   }
 }

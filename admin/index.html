@@ -219,7 +219,7 @@
     const submitInfo = async e => {
       e.preventDefault()
       const [textarea] = e.target
-      await POST.info({ sheet: getSheetName(e), info: textarea.value })
+      await POST.info({ body: { sheet: getSheetName(e), info: textarea.value } })
     }
 
     addCouette.onsubmit = async e => {
@@ -227,7 +227,7 @@
       const [input] = e.target
       const sheet = input.value
       // TODO: check que le nom existe pas deja
-      await POST.couette({ sheet })
+      await POST.couette({ body: { sheet } })
       const couetteData = { name: sheet, photos: [], info: '' }
       const couetteElement = createCouetteElements(couetteData)
       couettesWrapper.prepend(couetteElement)

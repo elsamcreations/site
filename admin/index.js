@@ -2,71 +2,27 @@ import { spawn } from 'child_process'
 import { once } from 'events'
 import { readFile, writeFile, readdir, mkdir, stat, rm } from 'fs/promises'
 import { basename, dirname } from 'path'
+import sharp from 'sharp'
+
+sharp.cache(false)
 
 // ENV
-const root = process.env.COUETTE_DIR || '/tmp/couette'
-const PWD = process.env.PWD || ''
+const root = process.env.COUETTE_DIR || './couette'
+const PWD = process.env.PWD || 'admin'
 
-// DEPENDENCIES
-// npm i -g @squoosh/cli
-// apt install libjpeg-progs # (install jpegtran for rotate)
-
-const resizeParams = {
-  enabled: true,
-  width: 1250,
-  height: 1250,
-  method: "lanczos3",
-  fitMethod: "contain",
-  premultiply: true,
-  linearRGB: true,
+const rotate = async (filepath, deg) => {
+  const buff = await sharp(filepath).rotate(Number(deg)).toBuffer()
+  await writeFile(filepath, buff)
 }
 
-const compressParams = {
-  quality: 75,
-  baseline: false,
-  arithmetic: false,
-  progressive: true,
-  optimize_coding: true,
-  smoothing: 0,
-  color_space: 3,
-  quant_table: 3,
-  trellis_multipass: false,
-  trellis_opt_zero: false,
-  trellis_opt_table: false,
-  trellis_loops: 1,
-  auto_subsample: true,
-  chroma_subsample: 2,
-  separate_chroma_quality: false,
-  chroma_quality: 75,
+const compress = async (filepath, size, target) => {
+  await mkdir(dirname(target), { recursive: true })
+  await sharp(filepath)
+    .resize(Number(size), Number(size))
+    .normalize()
+    .jpeg({ quality: 75, mozjpeg: true })
+    .toFile(target)
 }
-
-const spawner = cmd => async (args, options) => {
-  const child = spawn(cmd, args, { stdio: 'ignore', ...options })
-  const [code] = await once(child, 'close')
-  if (!code) return
-  console.log(cmd, ...args)
-  throw Error(`${cmd}: fail (${code})`)
-}
-
-const squoosh = spawner('squoosh-cli')
-const jpegtran = spawner('jpegtran')
-
-const rotate = (filepath, deg) => jpegtran([
-  '-rotate', deg,
-  '-outfile', filepath,
-  filepath,
-])
-
-const compress = (filepath, size) => squoosh([
-  `-d${size}`,
-  `--resize=${JSON.stringify({
-    ...resizeParams,
-    width: Number(size),
-    height: Number(size),
-  })}`,
-  `--mozjpeg=${JSON.stringify(compressParams)}`,
-  basename(filepath),
-], { cwd: dirname(filepath) })
 
 const couetteCache = {}
 const serveRequest = async (request) => {
@@ -147,7 +103,7 @@ const serveRequest = async (request) => {
       } catch (err) {
         if (err.code !== 'ENOENT') throw err
         await (couetteCache[target] ||
-          (couetteCache[target] = compress(source, size)))
+          (couetteCache[target] = compress(source, size, target)))
         return new Response(await readFile(target))
       }
     }
@@ -162,14 +118,11 @@ const serveRequest = async (request) => {
       // list all dirs
       const content = await readdir(`${root}/${sheet}`, { withFileTypes: true })
       const subdirs = content.filter(f => f.isDirectory())
-      const deleteWork = subdirs.map(({ name }) => {
-        const target = `${root}/${sheet}/${name}/${filename}`
-        couetteCache[target] = undefined
-        return rm(target, { force: true })
-      })
+      const subrotate = subdirs
+        .map(({ name }) => rotate(`${root}/${sheet}/${name}/${filename}`, deg))
 
       await rotate(`${root}/${sheet}/${filename}`, deg)
-      await Promise.all(deleteWork)
+      await Promise.all(subrotate)
 
       return new Response(null, { status: 201 })
     }
@@ -234,18 +187,13 @@ const serve = async fn => {
   return createServer({ cert, key: await readFile('/etc/oct.ovh.key') }, fn)
 }
 
-const server = await serve((req, res) => {
-  serveRequest(req)
-    .catch(err => {
-      console.log(err)
-      return new Response(err.stack, { status: 500 })
-    })
-    .then(
-      ({body, init}) => {
-        res.statusCode = init.status
-        res.end(body)
-      }
-    )
+const server = await serve(async (req, res) => {
+  const { body, init } = await serveRequest(req).catch(err => {
+    console.log(err)
+    return new Response(err.stack, { status: 500 })
+  })
+  res.statusCode = init.status
+  res.end(body)
 })
 
 server.listen(2096)
