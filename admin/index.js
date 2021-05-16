@@ -94,7 +94,7 @@ const serveRequest = async (request) => {
           const sheetDir = `${root}/${name}`
           const { birthtimeMs: createdAt } = await stat(sheetDir)
           const content = await readdir(sheetDir)
-          const images = content.filter(file => /\.(jpg|png)$/i.test(file))
+          const images = content.filter(file => /\.jpg$/i.test(file))
           const stats = await Promise.all(images.map(async path => [
             path,
             (await stat(`${sheetDir}/${path}`)).mtimeMs,
@@ -146,8 +146,8 @@ const serveRequest = async (request) => {
         return new Response(await readFile(target))
       } catch (err) {
         if (err.code !== 'ENOENT') throw err
-        await (couetteCache[`${source}/${size}`] ||
-          (couetteCache[`${source}/${size}`] = compress(source, size)))
+        await (couetteCache[target] ||
+          (couetteCache[target] = compress(source, size)))
         return new Response(await readFile(target))
       }
     }
@@ -162,8 +162,11 @@ const serveRequest = async (request) => {
       // list all dirs
       const content = await readdir(`${root}/${sheet}`, { withFileTypes: true })
       const subdirs = content.filter(f => f.isDirectory())
-      const deleteWork = subdirs
-        .map(({ name }) => rm(`${root}/${sheet}/${name}/${filename}`, { force: true }))
+      const deleteWork = subdirs.map(({ name }) => {
+        const target = `${root}/${sheet}/${name}/${filename}`
+        couetteCache[target] = undefined
+        return rm(target, { force: true })
+      })
 
       await rotate(`${root}/${sheet}/${filename}`, deg)
       await Promise.all(deleteWork)
