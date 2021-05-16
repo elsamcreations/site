@@ -8,7 +8,7 @@ sharp.cache(false)
 
 // ENV
 const root = process.env.COUETTE_DIR || './couette'
-const PWD = process.env.PWD || 'admin'
+const SECRET_PATH = process.env.SECRET_PATH || 'admin'
 
 const rotate = async (filepath, deg) => {
   const buff = await sharp(filepath).rotate(Number(deg)).toBuffer()
