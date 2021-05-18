@@ -79,7 +79,7 @@
   z-index: 10;
   bottom: 0;
   background-image: linear-gradient(transparent 0%, #fe8 40%);
-  height: 220px;
+  height: calc(min(31vw, 220px));
   display: flex;
   align-items: flex-end;
   padding: 20px calc(min(140px, 10%));
@@ -87,8 +87,8 @@
 }
 
 #sheets .bottom-bar .image {
-  height: 140px;
-  width: 140px;
+  height: calc(min(20vw, 140px));
+  width: calc(min(20vw, 140px));
   box-shadow: 7px 7px 0 0 #0008, black 0 0 0 2px inset;
   outline: 3px solid #64e2fa;
   background-color: #000;

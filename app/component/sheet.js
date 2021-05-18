@@ -48,8 +48,8 @@ export const Sheet = (couette) => {
     const dist = startX - X.get() || 0
     const delay = Date.now() - time
     if (Math.abs(dist) < 20 && delay < (width * 0.8)) {
-      console.log({ startX, offset: slider.offsetLeft, diff: startX - slider.offsetLeft, w: width /2 })
-      const dir = Math.sign((startX - slider.offsetLeft) - width / 2)
+      const { left } = sheet.getBoundingClientRect()
+      const dir = Math.sign((startX - left) - width / 2)
       const input = inputs[(-offset)/100 + dir]
       stop()
       return input && input.click()

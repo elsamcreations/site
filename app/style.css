@@ -27,10 +27,10 @@ body, html {
 }
 
 button {
-  font-size: 32px;
+  font-size: calc(min(5vw, 1.5em));
   font-variant: small-caps;
   border: 4px solid black;
-  padding: 15px 28px;
+  padding: calc(min(2.5vw, 0.75em)) calc(min(5vw, 1.5em));
   background: inherit;
   font-weight: bold;
   box-shadow: 5px 5px 0 0 #0008;
@@ -44,6 +44,7 @@ button:focus, button:hover {
 }
 
 h1 { border-bottom: 10px solid }
+h2 { font-size: calc(min(5vw, 1.5em)) }
 
 section {
   padding: 40px 0;
@@ -56,18 +57,21 @@ section > article, header, footer {
 }
 
 section > i:before {
-  font-size: 400px;
+  font-size: calc(min(200px, 36vw));
+  line-height: calc(min(160px, 28vw));
   display: inline-block;
   color: #0004;
   text-align: center;
   width: 1em;
   font-family: 'Permanent Marker';
   pointer-events: none;
+  position: relative;
+  z-index: 100;
 }
 
 section > i {
   display: inline-block;
-  top: -100px;
+  top: 0;
   position: absolute;
   width: 100%;
   overflow: hidden;
