@@ -1,15 +1,36 @@
 import './sheet.css'
-import { templates, buttons, X } from '../state.js'
+import { templates, buttons, X, activeElement } from '../state.js'
 
-const makeImageUrl = (filename, sheet) => 
-  `url(https://dev.oct.ovh:2096/x/photo?filename=${filename}&sheet=${sheet}&size=328)`
+const makeImageHref = (filename, sheet) => 
+  `https://dev.oct.ovh:2096/x/photo?filename=${filename}&sheet=${sheet}&size=328`
+
+const makeImageUrl = (filename, sheet) => `url(${makeImageHref(filename, sheet)})`
 
 const slideTo = (slider, n) => slider.style.transform = `translate(${n}%)`
+
+const sheetMeta = new WeakMap()
+export const selectedSheet = activeElement
+  .map((el) => sheetMeta.get(el))
+  .filter(Boolean)
+
+const bottomBar = document.querySelector('#sheets .bottom-bar')
+selectedSheet.on((meta) => {
+  if (!meta) return
+  const { data, element, cover } = meta
+  const img = bottomBar.querySelector('.image')
+  img.style.backgroundImage = `url(${cover})`
+})
+
+bottomBar.onsubmit = (e) => {
+  e.preventDefault()
+  document.querySelector('#sheets').classList.toggle('confirmed')
+}
 
 export const Sheet = (couette) => {
   if (!couette.photos.length) return ''
   const sheet = templates.sheet()
   sheet.id = couette.name
+  const meta = { data: couette, element: sheet, cover: makeImageHref(couette.photos[0], couette.name) }
 
   const [previews] = sheet.getElementsByClassName('previews')
   const [slider] = sheet.getElementsByClassName('slider')
@@ -18,6 +39,9 @@ export const Sheet = (couette) => {
     const [preview] = label.getElementsByTagName('div')
     const [input] = label.getElementsByTagName('input')
     const url = makeImageUrl(href, couette.name)
+    sheetMeta.set(input, meta)
+    sheetMeta.set(label, meta)
+    sheetMeta.set(preview, meta)
     preview.style.backgroundImage = url
     input.name = couette.name
     input.checked = !i
@@ -113,6 +137,6 @@ export const Sheet = (couette) => {
     start(e.touches[0].pageX)
   }
 
-  sheet.onmouseup = () => sheet.firstElementChild.focus()
+  sheet.onmousedown = () => inputs[(-offset)/100].focus()
   return sheet
 }
