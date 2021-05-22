@@ -80,8 +80,8 @@ section > i {
 #sheets > i:before { content: '1' }
 #sheets { background: #fe8 }
 
-#type > i:before { content: '2' }
-#type { background: #8ef }
+#clothing > i:before { content: '2' }
+#clothing { background: #8ef }
 
 #checkout > i:before { content: '3' }
 #checkout { background: #f8e }

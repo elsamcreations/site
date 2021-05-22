@@ -1,0 +1,43 @@
+#clothing svg {
+  max-height: 480px;
+}
+
+#clothing svg g {
+  display: none;
+}
+
+#clothing-selector {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+#clothing-selector svg:hover g path:first-child {
+  fill: #fb8;
+}
+
+#clothing-selector label {
+  flex-grow: 1;
+}
+
+#clothing-selector input[type="radio"]:checked + svg g path:first-child {
+  stroke-width: 20px;
+}
+
+#clothing-selector input[type="radio"] {
+  position: fixed;
+  opacity: 0;
+}
+
+@media screen and (max-width: 900px) {
+  #clothing-selector label {
+    width: 25%;
+  }
+}
+
+@media screen and (min-width: 900px) {
+  #clothing-selector label {
+    max-height: 128px;
+    max-width: 128px;
+  }
+}
