@@ -12,6 +12,13 @@ export const templates = Object.fromEntries(templatesEntries)
 // Events
 export const X = eve(0)
 export const buttons = eve(0)
+export const frame = eve(0)
+export const activeElement = frame.map(() => document.activeElement)
+
+requestAnimationFrame(function loop(time) {
+  frame.set(time)
+  requestAnimationFrame(loop)
+})
 
 const updateMouseState =  e => {
   X.set(e.x)
