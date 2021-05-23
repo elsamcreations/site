@@ -30,7 +30,8 @@ export const Sheet = (couette) => {
   if (!couette.photos.length) return ''
   const sheet = templates.sheet()
   sheet.id = couette.name
-  const meta = { data: couette, element: sheet, cover: makeImageHref(couette.photos[0], couette.name) }
+  const cover = makeImageHref(couette.photos[0], couette.name)
+  const meta = { data: couette, element: sheet, cover }
 
   const [previews] = sheet.getElementsByClassName('previews')
   const [slider] = sheet.getElementsByClassName('slider')
@@ -52,14 +53,13 @@ export const Sheet = (couette) => {
     return label
   })
 
+  previews.append(...inputs)
   slider.append(...couette.photos.map((href, i) => {
     const image = document.createElement('div')
     const url = makeImageUrl(href, couette.name)
     image.style.backgroundImage = url
     return image
   }))
-
-  previews.append(...inputs)
 
   // handle slide
   const max = (couette.photos.length-1) * -100
