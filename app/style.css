@@ -86,6 +86,9 @@ section > i {
 #checkout > i:before { content: '3' }
 #checkout { background: #f8e }
 
+body:not(.fr) span.fr,
+body:not(.en) span.en { display: none }
+
 /*
 https://media.discordapp.net/attachments/315112005591760896/841307470471495730/DSCN1451.JPG?width=959&height=719
 https://media.discordapp.net/attachments/315112005591760896/841307475785416754/DSCN1453.JPG?width=959&height=719

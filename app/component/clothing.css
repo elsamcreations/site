@@ -29,6 +29,12 @@
   opacity: 0;
 }
 
+#clothing p {
+  text-align: center;
+  font-weight: bold;
+  font-size: 32px;
+}
+
 @media screen and (max-width: 900px) {
   #clothing-selector label {
     width: 25%;

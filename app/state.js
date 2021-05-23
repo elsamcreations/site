@@ -8,12 +8,17 @@ const templatesEntries =
   })
 
 export const templates = Object.fromEntries(templatesEntries)
+const isFR = navigator.languages.includes('fr')
+const languageSuffix = isFR ? '_fr' : ''
+
+document.body.classList.add(isFR ? 'fr' : 'en')
 
 // Events
 export const X = eve(0)
 export const buttons = eve(0)
 export const frame = eve(0)
 export const activeElement = frame.map(() => document.activeElement)
+export const loc = new Proxy({}, { get: (_, k) => `${k}${languageSuffix}`})
 
 requestAnimationFrame(function loop(time) {
   frame.set(time)

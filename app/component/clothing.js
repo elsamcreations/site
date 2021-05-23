@@ -1,7 +1,8 @@
 import './clothing.css'
 
 import { eve } from '../../lib/eve.js'
-import { templates } from '../state.js'
+import { products } from '../data.js'
+import { templates, loc } from '../state.js'
 import { selectedSheet } from './sheet.js'
 
 selectedSheet.on(sheet => {
@@ -11,14 +12,22 @@ selectedSheet.on(sheet => {
     .setAttribute('href', sheet.cover)
 })
 
-export const selectedCloth = eve(undefined)
+const selectedClothing = eve(undefined)
 
-selectedCloth.on((group, prev) => {
+export const selectedProduct = selectedClothing
+  .map(group => group && products[group.id])
+  .filter(Boolean)
+
+selectedClothing.on((group, prev) => {
+  if (!group) return
   prev && (prev.style.display = '')
-  group && (group.style.display = 'initial')
+  group.style.display = 'initial'
 })
 
+selectedProduct.on(product => product && (title.textContent = product[loc.name]))
+
 const svg = document.querySelector('#clothing svg')
+const title = document.querySelector('#clothing p')
 const selectorWrapper = document.querySelector('#clothing-selector')
 const clothGroups = [...svg.getElementsByTagName('g')]
 const selectors = clothGroups.map(group => {
@@ -31,7 +40,7 @@ const selectors = clothGroups.map(group => {
   input.name = 'clothing-selector'
 
   label.append(thumb)
-  label.onclick = () => selectedCloth.set(group)
+  label.onclick = () => selectedClothing.set(group)
   return label
 })
 

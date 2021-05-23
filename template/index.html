@@ -16,6 +16,7 @@
       <li>Get a Shirt</li>
     </ol>
   </header>
+
   <section id="sheets">
     <template id="sheet">
       <div class="sheet">
@@ -30,7 +31,12 @@
       </label>
     </template>
     <i></i>
-    <article><h2>Pick your Sheet&nbsp;🕵️</h2></article>
+    <article>
+      <h2>
+        <span class="en">Pick your Sheet&nbsp;🕵️</span>
+        <span class="fr">Trouve ton Tissu&nbsp;🕵️</span>
+      </h2>
+    </article>
     <form class="bottom-bar">
       <div class="image"></div>
       <p></p>
@@ -41,7 +47,10 @@
   <section id="clothing">
     <i></i>
     <article>
-      <h2>Choose your Clothing&nbsp;🩳</h2>
+      <h2>
+        <span class="en">Choose your Clothing&nbsp;🩳</span>
+        <span class="fr">Choisis ton Vêtement&nbsp;🩳</span>
+      </h2>
       <svg version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" stroke-width="4" fill="none" stroke="#000">
         <defs>
           <pattern id="bg" width="1" height="1" fill="#fff">
@@ -87,6 +96,7 @@
           <path stroke-width="2" d="M253 250s12 18 38 6M336 258s16 17 41 2"/>
         </g>
       </svg>
+      <p>-</p>
       <form id="clothing-selector">
         <template id="selector">
           <label>
@@ -99,7 +109,14 @@
 
   <section id="checkout">
     <i></i>
-    <article><h2>Configure and Checkout&nbsp;🛒</h2></article>
+    <article>
+      <h2>
+        <span class="en">Configure and Checkout&nbsp;🛒</span>
+        <span class="fr">Personnalise et Achète&nbsp;🛒</span>
+      </h2>
+      <button id="checkout-button-230">230 x2</button>
+      <button id="checkout-button-215">215</button>
+    </article>
   </section>
 
   <footer></footer>
@@ -107,35 +124,3 @@
   <script type="module" src="/assets/index.js"></script>
 </body>
 </html>
-
-<!--
-<script src="https://js.stripe.com/v3"></script>
-<script>
-let stripe = Stripe('pk_test_51IinC4DDpZZcA4TdpugUkXBcmtRRtVdJzNS1848tKPzfwOSKtk38oERfhRs2O4KEDBAfLZcuphK7aUQwXcQOMj2J00UTM90XhD')
-
-function setStripe(id, items) {
-  document.getElementById(id).addEventListener('click', function () {
-    stripe.redirectToCheckout({
-      items: items,
-      successUrl: 'https://traitedelutherie.com/success',
-      cancelUrl: 'https://traitedelutherie.com/canceled',
-    })
-    .then(function (result) {
-      if (result.error) {
-        let displayError = document.getElementById('error-message')
-        displayError.textContent = result.error.message
-      }
-    })
-  })
-}
-
-setStripe('checkout-button-230', [
-  {sku: 'sku_EnciNWzNmYYbh8', quantity: 1},
-  {sku: 'sku_EnclvkJ8hiu8Iz', quantity: 1},
-])
-
-setStripe('checkout-button-215', [
-  {sku: 'sku_EnciNWzNmYYbh8', quantity: 1},
-  //{sku: 'sku_EnclvkJ8hiu8Iz', quantity: 1},
-])
--->
