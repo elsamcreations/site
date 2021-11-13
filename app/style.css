@@ -77,6 +77,12 @@ section > i {
   overflow: hidden;
 }
 
+#logo {
+  max-width: 400px;
+  display: block;
+  margin: 6em auto;
+}
+
 #sheets > i:before { content: '1' }
 #sheets { background: #fe8 }
 
