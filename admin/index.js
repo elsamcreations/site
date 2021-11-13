@@ -112,7 +112,8 @@ const serveRequest = async (request) => {
       } catch (err) {
         if (err.code !== 'ENOENT') throw err
         await (couetteCache[target] ||
-          (couetteCache[target] = compress(source, size, target)))
+          (couetteCache[target] = compress(source, size, target)
+            .finally(() => couetteCache[target] = undefined)))
         return new Response(await readFile(target), STATIC)
       }
     }
