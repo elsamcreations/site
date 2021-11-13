@@ -25,10 +25,10 @@ const compress = async (filepath, size, target) => {
 }
 
 const HEADERS = headers => ({ headers })
-const STATIC = HEADERS({ 'Cache-Control': 'public, max-age=86400' })
+const STATIC = HEADERS({ 'Cache-Control': 'public, max-age=86400, stale-while-revalidate=300' })
 const CORS = HEADERS({
   'Access-Control-Allow-Origin': '*',
-  'Cache-Control': 'public, max-age: 3600',
+  'Cache-Control': 'public, max-age: 3600, stale-while-revalidate=300',
 })
 
 const couetteCache = {}
@@ -198,6 +198,11 @@ const serve = async fn => {
 }
 
 const server = await serve(async (req, res) => {
+  if (request.url === '/favicon.ico') {
+    res.writeHead(204, STATIC)
+    res.end(null)
+    return 
+  }
   const { body, init } = await serveRequest(req).catch(err => {
     console.log(err)
     return new Response(err.stack, { status: 500 })
@@ -207,4 +212,4 @@ const server = await serve(async (req, res) => {
   res.end(body)
 })
 
-server.listen(2096)
+server.listen(443)

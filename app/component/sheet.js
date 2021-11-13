@@ -2,7 +2,7 @@ import './sheet.css'
 import { templates, buttons, X, activeElement } from '../state.js'
 
 const makeImageHref = (filename, sheet) => 
-  `https://dev.oct.ovh:2096/x/photo?filename=${filename}&sheet=${sheet}&size=328`
+  `https://dev.oct.ovh/x/photo?filename=${filename}&sheet=${sheet}&size=328`
 
 const makeImageUrl = (filename, sheet) => `url(${makeImageHref(filename, sheet)})`
 
