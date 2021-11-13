@@ -198,7 +198,7 @@ const serve = async fn => {
 }
 
 const server = await serve(async (req, res) => {
-  if (request.url === '/favicon.ico') {
+  if (req.url === '/favicon.ico') {
     res.writeHead(204, STATIC)
     res.end(null)
     return 
