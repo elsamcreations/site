@@ -174,11 +174,12 @@ body {
     </a>
     <div class="image">
       <div class="shadow"></div>
-      <div class="clip"><img src="https://i.imgur.com/bdfNaJo.jpg"></div>
+      <div class="clip"><img src="dentelle.jpg"></div>
     </div>
   </article>
   <article id="elsa">
     <h2>Qui-suis-je ?</h2>
+    Une fille avec des cheveux et tout qui fait de la couture
   </article>
   <article id="contact">
     <h2>Contact</h2>
@@ -188,10 +189,12 @@ body {
   </article>
 <script type="text/javascript">
 
-let images = [...document.querySelectorAll('.image > .clip > img'), ...document.querySelectorAll('.image > .clip > svg')]
 // TODO: lazy load images, append css class after load
-for (let img of images) {
-  let clone = img.cloneNode(true)
+for (const img of [
+  ...document.querySelectorAll('.image > .clip > img'),
+  ...document.querySelectorAll('.image > .clip > svg'),
+]) {
+  const clone = img.cloneNode(true)
   clone.classList.add('highlight')
   img.parentElement.append(clone)
 }
