@@ -24,7 +24,13 @@ const compress = async (filepath, size, target) => {
     .toFile(target)
 }
 
-const CORS = { headers: { 'Access-Control-Allow-Origin': '*' } }
+const HEADERS = headers => ({ headers })
+const STATIC = HEADERS({ 'Cache-Control': 'public, max-age=86400' })
+const CORS = HEADERS({
+  'Access-Control-Allow-Origin': '*',
+  'Cache-Control': 'public, max-age: 3600',
+})
+
 const couetteCache = {}
 const serveRequest = async (request) => {
   const url = new URL(`http://e${request.url}`)
@@ -37,7 +43,7 @@ const serveRequest = async (request) => {
   console.log(route, params)
   switch (route) {
     case 'GET:/':
-      return new Response(await readFile(`./admin/index.html`), CORS)
+      return new Response(await readFile(`./admin/index.html`), STATIC)
 
     case 'GET:/couette': {
       const couettesList = await readdir(root, { withFileTypes: true })
@@ -102,12 +108,12 @@ const serveRequest = async (request) => {
       }
 
       try {
-        return new Response(await readFile(target))
+        return new Response(await readFile(target), STATIC)
       } catch (err) {
         if (err.code !== 'ENOENT') throw err
         await (couetteCache[target] ||
           (couetteCache[target] = compress(source, size, target)))
-        return new Response(await readFile(target))
+        return new Response(await readFile(target), STATIC)
       }
     }
 
