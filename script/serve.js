@@ -10,3 +10,6 @@ console.log(server)
 
 // Call "stop" on the web server when you're done
 // server.stop()
+process.env.ADMIN_PORT || (process.env.ADMIN_PORT = 4242)
+
+await import('../admin/index.js')

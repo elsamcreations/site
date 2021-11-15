@@ -2,7 +2,12 @@ import { spawn } from 'child_process'
 import { once } from 'events'
 import { readFile, writeFile, readdir, mkdir, stat, rm } from 'fs/promises'
 import { basename, dirname } from 'path'
+
 import sharp from 'sharp'
+
+import { readBodyJSON, readBody } from './utils.js'
+import { parseWebhook } from './stripe.js'
+import { notify } from './mailjet.js'
 
 sharp.cache(false)
 
@@ -44,6 +49,26 @@ const serveRequest = async (request) => {
   switch (route) {
     case 'GET:/':
       return new Response(await readFile(`./admin/index.html`), STATIC)
+
+    case 'GET:/webhook': {
+      const event = await parseWebhook(request)
+      // check what event we get
+      // checkout.session.completed ?
+      if (event.type !== 'checkout.session.async_payment_succeeded') {
+        return new Response(null, { status: 400 })
+      }
+      // retrieve session data and user email
+      // once the session is confirmed, send the command email to elsa
+      await notify({ subject: 'yolo', text: 'wesh' })
+      return new Response(null, { status: 204 })
+    }
+
+    case 'POST:/checkout': {
+      const { cart } = await readBodyJSON(request)
+      const location = await createSession(cart)
+
+      return new Response(null, { status: 303, headers: { location }})
+    }
 
     case 'GET:/couette': {
       const couettesList = await readdir(root, { withFileTypes: true })
@@ -174,17 +199,6 @@ class Response {
   }
 }
 
-async function readBody(req) {
-  const chunks = []
-  for await (const chunk of req) chunks.push(chunk)
-  return Buffer.concat(chunks)
-}
-
-async function readBodyJSON(req) {
-  const buf = await readBody(req)
-  return JSON.parse(buf.toString('utf8'))
-}
-
 const serve = async fn => {
   const cert = await readFile('/etc/oct.ovh.crt').catch(err => err)
   if (cert instanceof Error) {
@@ -212,4 +226,4 @@ const server = await serve(async (req, res) => {
   res.end(body)
 })
 
-server.listen(443)
+server.listen(process.env.ADMIN_PORT || 443)

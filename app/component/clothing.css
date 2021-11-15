@@ -1,5 +1,7 @@
 #clothing svg {
   max-height: 480px;
+  margin: 0 auto;
+  display: block;
 }
 
 #clothing svg g {

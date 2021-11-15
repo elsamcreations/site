@@ -1,39 +1,32 @@
-const script = document.createElement('script')
-script.src = 'https://js.stripe.com/v3'
-script.onerror = (ev) => {
-  console.error(ev, Error('Failed to load stripe'))
-}
+import './checkout.css'
 
-script.onload = async () => {
-  let stripe = Stripe('pk_test_51IinC4DDpZZcA4TdpugUkXBcmtRRtVdJzNS1848tKPzfwOSKtk38oERfhRs2O4KEDBAfLZcuphK7aUQwXcQOMj2J00UTM90XhD')
+import { loc } from '../state.js'
+import { products } from '../data.js'
+import { selectedSheet } from './sheet.js'
+import { selectedProduct } from './clothing.js'
 
-  function setStripe(id, lineItems) {
-    document.getElementById(id).addEventListener('click', function () {
-      stripe.redirectToCheckout({
-        lineItems: lineItems,
-        mode: 'payment',
-        successUrl: 'https://traitedelutherie.com/success',
-        cancelUrl: 'https://traitedelutherie.com/canceled',
-        customerEmail: 'patrick@gmail.com',
-      })
-      .then(function (result) {
-        if (result.error) {
-          let displayError = document.getElementById('error-message')
-          displayError.textContent = result.error.message
-        }
-      })
-    })
-  }
+const cart = []
 
-  setStripe('checkout-button-230', [
-    {price: 'price_1IinlvDDpZZcA4TdpJ9isAfZ', quantity: 1},
-    {price: 'price_1IuLNQDDpZZcA4TdeujbHChp', quantity: 2},
-  ])
+console.log(products)
 
-  setStripe('checkout-button-215', [
-    {price: 'price_1IinlvDDpZZcA4TdpJ9isAfZ', quantity: 1},
-    //{sku: 'sku_EnclvkJ8hiu8Iz', quantity: 1},
-  ])
-}
+const sizesSelector = document.getElementById('sizes-selector')
 
-document.body.append(script)
+selectedProduct.on(product => {
+  const name = product[loc.name]
+  sizesSelector.classList.toggle('disabled', !product.sizes)
+  
+  console.log(product.options)
+})
+
+document.getElementById('order-form').addEventListener('submit', (event) => {
+  event.preventDefault()
+  console.log({
+    sheet: selectedSheet.get().data.name,
+    product: selectedProduct.get()[loc.name],
+  })
+  
+  const items = [
+    // { quantity, product, sheet, size, note },
+  ]
+
+})
