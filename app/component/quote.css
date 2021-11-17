@@ -1,0 +1,48 @@
+#quote .deco {
+  font-size: var(--xl);
+  font-family: "Schoolbell";
+  letter-spacing: -6px;
+  user-select: none;
+  visibility: hidden;
+}
+
+#quote label b {
+  font-variant: small-caps;
+}
+
+#quote label:focus-within {
+  outline: 3px dashed #0008;
+  outline-offset: -9px;
+}
+
+#quote label {
+  display: inline-flex;
+  resize: vertical;
+  border-radius: 0.5em;
+  border: 4px solid black;
+  padding: 0.25em 0.5em;
+  font-family: monospace;
+  font-size: 1em;
+  margin-bottom: 2em;
+  align-items: center;
+  background: #fff;
+  width: calc(min(28em, 100%));
+}
+
+#quote input[type="email"] {
+  outline: none;
+  border: 0;
+  font-family: monospace;
+  font-size: 1em;
+  width: 100%;
+}
+
+#quote svg {
+  margin: 5em auto 2em;
+  display: block;
+  width: calc(min(20em, 80%));
+}
+
+#click-now { display: inline-block }
+#quote #click-now:hover .deco { visibility: visible }
+#quote #click-now:hover .deco { visibility: visible }

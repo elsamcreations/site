@@ -1,0 +1,18 @@
+#instructions textarea:hover {
+  outline: 4px dashed #0008;
+  outline-offset: -12px;
+}
+
+#instructions textarea {
+  width: calc(min(900px, 100%));
+  resize: vertical;
+  height: 13em;
+  border-radius: 0.5em;
+  border: 4px solid black;
+  padding: 1em;
+  font-family: monospace;
+  font-size: 1em;
+  margin: 0 auto;
+  display: block;
+}
+
