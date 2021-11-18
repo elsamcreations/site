@@ -8,7 +8,7 @@ const templatesEntries =
   })
 
 export const templates = Object.fromEntries(templatesEntries)
-const isFR = navigator.languages.includes('fr')
+export const isFR = navigator.languages.includes('fr')
 const languageSuffix = isFR ? '_fr' : ''
 
 document.body.classList.add(isFR ? 'fr' : 'en')

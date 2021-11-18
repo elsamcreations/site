@@ -5,12 +5,10 @@
   border-radius: 1em;
 }
 
+#size { padding-bottom: 3em }
 #size div.disabled {
   opacity: 0.5;
   pointer-events: none;
-}
-#size {
-  padding-bottom: 3em;
 }
 
 #size input[type=radio] {

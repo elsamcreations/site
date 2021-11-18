@@ -43,6 +43,11 @@ body, html {
   font-size: 22px;
 }
 
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 /* Interactive element */
 
 button,
@@ -76,14 +81,29 @@ h1, h2 { font-family: 'sb-inline', 'Schoolbell' }
 h1 { border-bottom: 10px solid }
 h2 { font-size: var(--l) }
 
-section {
+section, footer {
   padding: 40px 0;
   min-height: 400px;
   position: relative;
+  width: 100%;
 }
 
-section > article, header, footer {
+section:before, footer:before {
+  content: ' ';
+  display: block;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 2000 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise2'%3E%3CfeTurbulence baseFrequency='0.02'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='10'/%3E%3C/filter%3E%3Cpath filter='url(%23noise2)' d='M-10,10 L3000,10 V115' stroke='%23000' fill='none' stroke-width='8px'/%3E%3C/svg%3E");
+  height: 8px;
+  top: -44px;
+  position: relative;
+  background-repeat: repeat-x;
+}
+
+section > article, header {
   margin: 0 calc(min(140px, 10%));
+}
+
+header {
+  max-width: 900px;
 }
 
 section > i:before {

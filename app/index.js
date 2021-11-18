@@ -1,11 +1,11 @@
 import './style.css'
 import './component/instructions.css'
-import './component/quote.css'
 import { Sheet } from './component/sheet.js'
+import './component/quote.js'
 import './component/clothing.js'
 import './component/size.js'
 
-fetch('https://dev.oct.ovh/x/couette')
+fetch('https://dev.oct.ovh/couette')
   .then((res) => res.json())
   .then((couettes) => {
     const sheets = couettes.map(Sheet)
