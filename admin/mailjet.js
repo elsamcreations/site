@@ -46,17 +46,17 @@ If you have any question or additionnal demands, just reply to this email, I rea
 </pre>`
 
 const confirmTemplateFr = (order) => `<pre>
-Salut, c'est Elsa, Merci pour la commande, voici ce que j'ai noter:
+Salut, c'est Elsa, merci pour la commande, voici ce que j'ai noté:
 
 ${formatOrder(order)}
 
 Clique <a href="https://dev.oct.ovh/confirm?id=${
   order.id
-}">ce lien de confirmation</a> pour que je t'envois un devis.
+}">ce lien de confirmation</a> pour que je t'envoie un devis.
 
-Si tu a d'autre question / demandes, repond simplement a cet email :-)
+Si tu as d'autres questions / demandes, réponds simplement à cet email :-)
 
-<i>- A tres vite, ElsaM.</i>
+<i>- A très vite, ElsaM.</i>
 </pre>`
 
 export const submitOrder = async (order) =>
