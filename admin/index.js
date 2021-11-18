@@ -209,7 +209,7 @@ class Response {
 }
 
 const serve = async (fn) => {
-  const cert = await readFile('/etc/oct.ovh.crt').catch((err) => err)
+  const cert = await readFile('/etc/elsamcreations.crt').catch((err) => err)
   if (cert instanceof Error) {
     if (cert.code !== 'ENOENT') throw cert
     const { createServer } = await import('http')
@@ -217,7 +217,7 @@ const serve = async (fn) => {
   }
 
   const { createServer } = await import('https')
-  return createServer({ cert, key: await readFile('/etc/oct.ovh.key') }, fn)
+  return createServer({ cert, key: await readFile('/etc/elsamcreations.key') }, fn)
 }
 
 const server = await serve(async (req, res) => {

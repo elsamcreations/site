@@ -20,7 +20,7 @@ form.addEventListener('submit', e => {
 
   form.parentElement.dataset.state = 'disabled'
   btn.disabled = true
-  fetch('https://dev.oct.ovh/order', {
+  fetch('https://api.elsamcreations.com/order', {
     method: 'POST',
     body: JSON.stringify({
       lang: isFR ? 'FR' : 'EN',

@@ -5,7 +5,7 @@ import './component/quote.js'
 import './component/clothing.js'
 import './component/size.js'
 
-fetch('https://dev.oct.ovh/couette')
+fetch('https://api.elsamcreations.com/couette')
   .then((res) => res.json())
   .then((couettes) => {
     const sheets = couettes.map(Sheet)

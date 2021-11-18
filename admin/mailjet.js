@@ -31,32 +31,43 @@ export async function sendMail(CustomID, { subject, content, to }) {
 }
 
 // CONFIRM
+const A = (href, text = href) =>
+  `<a href="${href}" style="color: #007BFF; cursor: pointer; text-decoration: underline">${text}</a>`
 const confirmTemplate = (order) => `<pre>
 Hey it's Elsa, Thanks for your order, here are my notes:
 
 ${formatOrder(order)}
 
-Click <a href="https://dev.oct.ovh/confirm?id=${
-  order.id
-}">this confirmation link</a> to request a quote.
+Click ${A(
+  `https://api.eslamcreations.com/confirm?id=${order.id}`,
+  'this confirmation link',
+)} to request a quote.
 
 If you have any question or additionnal demands, just reply to this email, I read them.
 
 <i>- Talk to you soon, ElsaM.</i>
+
+
+PS: if the link doesn't work, copy / paste ${A(`https://api.eslamcreations.com/confirm?id=${order.id}`)}
 </pre>`
 
 const confirmTemplateFr = (order) => `<pre>
-Salut, c'est Elsa, merci pour la commande, voici ce que j'ai noté:
+Salut, c'est Elsa, Merci pour la commande, voici ce que j'ai noter:
 
 ${formatOrder(order)}
 
-Clique <a href="https://dev.oct.ovh/confirm?id=${
-  order.id
-}">ce lien de confirmation</a> pour que je t'envoie un devis.
+Clique ${A(
+  `https://api.eslamcreations.com/confirm?id=${order.id}`,
+  'ce lien de confirmation',
+)} pour que je t'envois un devis.
 
-Si tu as d'autres questions / demandes, réponds simplement à cet email :-)
+Si tu a d'autres questions / demandes, réponds simplement a cet email :-)
 
-<i>- A très vite, ElsaM.</i>
+<i>- A tres vite, ElsaM.</i>
+
+
+
+PS: si le lien marche pas, copie / colle ${A(`https://api.eslamcreations.com/confirm?id=${order.id}`)}
 </pre>`
 
 export const submitOrder = async (order) =>
