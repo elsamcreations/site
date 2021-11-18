@@ -51,7 +51,15 @@ const serveRequest = async (request) => {
 }
 
 const handlers = {}
-handlers[`GET:/`] = async () =>
+handlers[`GET:/`] = async () => {
+  const body = Object.fromEntries(Object.entries(handlers).map(([k, v]) => {
+    const [method, path] = k.split(':')
+    return [path.replace(PWD, 'admin'), { method, code: String(v) }]
+  }))
+  return new Response(JSON.stringify(body, null, 2), { status: 200, ...CORS })
+}
+
+handlers[`GET:/${PWD}`] = async () =>
   new Response(await readFile(`./admin/index.html`), STATIC)
 
 handlers[`POST:/order`] = async ({ request }) => {
@@ -199,7 +207,7 @@ handlers[`DELETE:/${PWD}/photo`] = async ({ params }) => {
   await Promise.all(deleteWork)
 
   return new Response(null, { status: 204 })
-}
+}  
 
 class Response {
   constructor(body, init) {
