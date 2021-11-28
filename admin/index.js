@@ -36,7 +36,7 @@ const STATIC = HEADERS({
 
 const CORS = HEADERS({
   'Access-Control-Allow-Origin': '*',
-  'Cache-Control': 'public, max-age: 3600, stale-while-revalidate=300',
+  'Cache-Control': 'public, max-age=3600, stale-while-revalidate=300',
 })
 
 const couetteCache = {}
@@ -45,6 +45,12 @@ const serveRequest = async (request) => {
   const key = `${request.method}:${url.pathname}`
   const route = handlers[key]
   if (!route) return new Response(`${url.pathname} Not found`, { status: 404 })
+
+  const isAdmin = url.pathname.startsWith('/admin/')
+  if (isAdmin && request.headers.authorization !== PWD) {
+    return new Response(`${url.pathname} Unauthorized`, { status: 401 })
+  }
+
   const params = Object.fromEntries(url.searchParams)
   console.log(`${request.method}:${url.pathname}`, params)
   return route({ request, params, url })
@@ -54,12 +60,12 @@ const handlers = {}
 handlers[`GET:/`] = async () => {
   const body = Object.fromEntries(Object.entries(handlers).map(([k, v]) => {
     const [method, path] = k.split(':')
-    return [path.replace(PWD, 'admin'), { method, code: String(v) }]
+    return [path, { method, code: String(v) }]
   }))
   return new Response(JSON.stringify(body, null, 2), { status: 200, ...CORS })
 }
 
-handlers[`GET:/${PWD}`] = async () =>
+handlers[`GET:/admin`] = async () =>
   new Response(await readFile(`./admin/index.html`), STATIC)
 
 handlers[`POST:/order`] = async ({ request }) => {
@@ -78,7 +84,7 @@ handlers[`GET:/confirm`] = async ({ params }) => {
   return new Response(null, { status: 303, headers: { location } })
 }
 
-handlers[`GET:/couette`] = async () => {
+const getAllCouettes = async () => {
   const couettesList = await readdir(root, { withFileTypes: true }).catch(
     (err) => {
       if (err.code !== 'ENOENT') throw err
@@ -107,17 +113,26 @@ handlers[`GET:/couette`] = async () => {
       return { name, info, photos, createdAt }
     })
 
-  const body = JSON.stringify(await Promise.all(couettesInfo))
+  return Promise.all(couettesInfo)
+}
+
+handlers[`GET:/couette`] = async () => {
+  const body = JSON.stringify(await getAllCouettes())
   return new Response(body, CORS)
 }
 
-handlers[`POST:/${PWD}/couette`] = async ({ request }) => {
+handlers[`GET:/admin/couette`] = async () => {
+  const body = JSON.stringify(await getAllCouettes())
+  return new Response(body)
+}
+
+handlers[`POST:/admin/couette`] = async ({ request }) => {
   const { sheet } = await readBodyJSON(request)
   await mkdir(`${root}/${normalize(sheet)}`, { recursive: true })
   return new Response(null, { status: 201 })
 }
 
-handlers[`POST:/${PWD}/info`] = async ({ request }) => {
+handlers[`POST:/admin/info`] = async ({ request }) => {
   const body = await readBodyJSON(request)
   const sheet = body.sheet?.toLowerCase()
   await writeFile(`${root}/${sheet}/info.txt`, body.info, 'utf8')
@@ -154,7 +169,7 @@ handlers[`GET:/photo`] = async ({ url, params }) => {
   }
 }
 
-handlers[`PATCH:/${PWD}/photo`] = async ({ params }) => {
+handlers[`PATCH:/admin/photo`] = async ({ params }) => {
   const { deg } = params
   if (!deg) return new Response('Missing deg', { status: 400 })
 
@@ -178,7 +193,7 @@ handlers[`PATCH:/${PWD}/photo`] = async ({ params }) => {
   return new Response(null, { status: 201 })
 }
 
-handlers[`POST:/${PWD}/photo`] = async ({ request }) => {
+handlers[`POST:/admin/photo`] = async ({ request }) => {
   const { filename, sheet } = params
   if (!filename) return new Response('Missing filename', { status: 400 })
   if (!sheet || sheet === 'order') {
@@ -190,7 +205,7 @@ handlers[`POST:/${PWD}/photo`] = async ({ request }) => {
   return new Response(null, { status: 201 })
 }
 
-handlers[`DELETE:/${PWD}/photo`] = async ({ params }) => {
+handlers[`DELETE:/admin/photo`] = async ({ params }) => {
   const { filename, sheet } = params
   if (!filename) return new Response('Missing filename', { status: 400 })
   if (!sheet || sheet === 'order') {
