@@ -1,7 +1,7 @@
 export const products = {
   chemiseCourte: {
     name: 'Short sleeves shirt (man)',
-    name_fr: 'Chemise manches courte (homme)',
+    name_fr: 'Chemise manches courtes (homme)',
     cost: 7500,
     sizes: true,
   },
@@ -24,7 +24,7 @@ export const products = {
   pantalon: { name: 'Trousers', name_fr: 'Pantalon', cost: 5000, sizes: true },
   serviette: {
     name: 'Washable Pads',
-    name_fr: 'Serviettes Hygiénique Lavable',
+    name_fr: 'Serviette Hygiénique Lavable',
     cost: 700,
   },
 }
