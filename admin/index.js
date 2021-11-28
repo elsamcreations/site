@@ -68,6 +68,12 @@ handlers[`GET:/`] = async () => {
 handlers[`GET:/admin`] = async () =>
   new Response(await readFile(`./admin/index.html`), STATIC)
 
+handlers[`GET:/order`] = async ({ params }) => {
+  const { order } = params
+  if (!order) return new Response('Missing order', { status: 400 })
+  return new Response(await readFile(`${root}/orders/${order}.json`), STATIC)
+}
+
 handlers[`POST:/order`] = async ({ request }) => {
   const order = await readBodyJSON(request)
   if (!order?.email) return new Response('Missing email', { status: 400 })
