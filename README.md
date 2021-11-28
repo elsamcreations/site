@@ -1,10 +1,10 @@
 # Site
 
 The website
-- fix le couette manager 2000
 - afficher quand le mail est parti ou si ya ue une erreur
 - afficher le bon de commande quand on confirme
 - rajouter des examples pour la partie des instructions
+- rajoute les metadata, SEO power
 - afficher une appercu du prix minimum
 - expliquer le prix (quantite de tissue, heure de travail)
 - decrire des examples de personnalisation et une hestimation de leur cout
