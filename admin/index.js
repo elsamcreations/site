@@ -193,7 +193,7 @@ handlers[`PATCH:/admin/photo`] = async ({ params }) => {
   return new Response(null, { status: 201 })
 }
 
-handlers[`POST:/admin/photo`] = async ({ request }) => {
+handlers[`POST:/admin/photo`] = async ({ request, params }) => {
   const { filename, sheet } = params
   if (!filename) return new Response('Missing filename', { status: 400 })
   if (!sheet || sheet === 'order') {
