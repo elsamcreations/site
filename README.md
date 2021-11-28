@@ -12,3 +12,4 @@ The website
 - seulement afficher les tissus disponible pour le vetement selectionner
 - udpate la preview pour etre avec le vetement selectioner au lieu d'un carre
 - utiliser le francais par defaut et juste proposer l'anglais si le navigateur n'a pas le fr
+- aller pisser de temps en temps
