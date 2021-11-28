@@ -80,8 +80,10 @@ handlers['POST:/order'] = async ({ request }) => {
   const order = await readBodyJSON(request)
   if (!order?.email) return new Response('Missing email', { status: 400 })
   order.id = `${Date.now()}_${normalize(order.email)}`
-  await writeFile(`${root}/orders/${order.id}.json`, JSON.stringify(order), 'utf8')
-  await submitOrder(order)
+  const filename = `${root}/orders/${order.id}.json`
+  const result = await submitOrder(order)
+  console.log({ result })
+  await writeFile(filename, JSON.stringify(order), 'utf8')
   return new Response(null, { status: 204, ...CORS })
 }
 
