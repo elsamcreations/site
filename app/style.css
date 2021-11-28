@@ -20,6 +20,16 @@
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
+/* latin */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/poppins/v15/pxiByp8kv8JHgFVrLBT5Z1xlFQ.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 @font-face {
   font-family: 'sb-inline';
   font-style: normal;
@@ -77,9 +87,44 @@ button:focus, button:hover {
   outline-offset: -12px;
 }
 
-h1, h2 { font-family: 'sb-inline', 'Schoolbell' }
-h1 { border-bottom: 10px solid }
-h2 { font-size: var(--l) }
+h1, h2 { font-family: 'sb-inline', 'Schoolbell'; color: #000 }
+h1 {
+  border-bottom: 10px solid;
+  margin-bottom: 3em;
+}
+article h2 { font-size: var(--l) }
+
+header {
+  color: #333;
+  padding-bottom: 4em;
+}
+
+header ol li::marker {
+  font-family: 'sb-inline';
+  font-size: 2em;
+  font-style: italic;
+}
+header li {
+  padding: 0.5em 0;
+}
+header ol li {
+  padding: 1em 0;
+}
+
+header b { color: #36426f }
+
+blockquote {
+  border-left: 0.5em solid #ddd;
+  padding-left: 1em;
+  margin-left: 0;
+}
+
+:link {
+  color: #2D55F2;
+  font-weight: bold;
+}
+
+:visited { color: #8540C4; }
 
 section, footer {
   padding: 40px 0;
@@ -88,16 +133,25 @@ section, footer {
   width: 100%;
 }
 
-section:before, footer:before {
-  content: ' ';
+hr {
+  height: 2em;
+  border: none;
+  margin: 4em 0;
+  opacity: 0.6;
+}
+
+hr, section:before, footer:before {
   display: block;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 2000 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise2'%3E%3CfeTurbulence baseFrequency='0.02'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='10'/%3E%3C/filter%3E%3Cpath filter='url(%23noise2)' d='M-10,10 L3000,10 V115' stroke='%23000' fill='none' stroke-width='8px'/%3E%3C/svg%3E");
-  height: 8px;
-  top: -44px;
-  position: relative;
   background-repeat: repeat-x;
 }
 
+section:before, footer:before {
+  content: ' ';
+  height: 8px;
+  top: -44px;
+  position: relative;
+}
 section > article, header {
   margin: 0 calc(min(140px, 10%));
 }
