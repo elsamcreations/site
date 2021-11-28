@@ -57,24 +57,26 @@ const serveRequest = async (request) => {
 }
 
 const handlers = {}
-handlers[`GET:/`] = async () => {
-  const body = Object.fromEntries(Object.entries(handlers).map(([k, v]) => {
-    const [method, path] = k.split(':')
-    return [path, { method, code: String(v) }]
-  }))
+handlers['GET:/'] = async () => {
+  const body = Object.fromEntries(
+    Object.entries(handlers).map(([k, v]) => {
+      const [method, path] = k.split(':')
+      return [path, { method, code: String(v) }]
+    }),
+  )
   return new Response(JSON.stringify(body, null, 2), { status: 200, ...CORS })
 }
 
-handlers[`GET:/admin`] = async () =>
+handlers['GET:/admin'] = async () =>
   new Response(await readFile(`./admin/index.html`), STATIC)
 
-handlers[`GET:/order`] = async ({ params }) => {
+handlers['GET:/order'] = async ({ params }) => {
   const { order } = params
   if (!order) return new Response('Missing order', { status: 400 })
   return new Response(await readFile(`${root}/orders/${order}.json`), STATIC)
 }
 
-handlers[`POST:/order`] = async ({ request }) => {
+handlers['POST:/order'] = async ({ request }) => {
   const order = await readBodyJSON(request)
   if (!order?.email) return new Response('Missing email', { status: 400 })
   order.id = `${Date.now()}_${normalize(order.email)}`
@@ -83,7 +85,7 @@ handlers[`POST:/order`] = async ({ request }) => {
   return new Response(null, { status: 204, ...CORS })
 }
 
-handlers[`GET:/confirm`] = async ({ params }) => {
+handlers['GET:/confirm'] = async ({ params }) => {
   const json = await readFile(`${root}/orders/${params.id}.json`, 'utf8')
   await confirmQuote(JSON.parse(json))
   const location = `https://elsamcreations.com/giveasheet?order=${params.id}`
@@ -122,30 +124,30 @@ const getAllCouettes = async () => {
   return Promise.all(couettesInfo)
 }
 
-handlers[`GET:/couette`] = async () => {
+handlers['GET:/couette'] = async () => {
   const body = JSON.stringify(await getAllCouettes())
   return new Response(body, CORS)
 }
 
-handlers[`GET:/admin/couette`] = async () => {
+handlers['GET:/admin/couette'] = async () => {
   const body = JSON.stringify(await getAllCouettes())
   return new Response(body)
 }
 
-handlers[`POST:/admin/couette`] = async ({ request }) => {
+handlers['POST:/admin/couette'] = async ({ request }) => {
   const { sheet } = await readBodyJSON(request)
   await mkdir(`${root}/${normalize(sheet)}`, { recursive: true })
   return new Response(null, { status: 201 })
 }
 
-handlers[`POST:/admin/info`] = async ({ request }) => {
+handlers['POST:/admin/info'] = async ({ request }) => {
   const body = await readBodyJSON(request)
   const sheet = body.sheet?.toLowerCase()
   await writeFile(`${root}/${sheet}/info.txt`, body.info, 'utf8')
   return new Response(null, { status: 201 })
 }
 
-handlers[`GET:/photo`] = async ({ url, params }) => {
+handlers['GET:/photo'] = async ({ url, params }) => {
   const { size } = params
   if (!size) return new Response('Missing size', { status: 400 })
 
@@ -175,7 +177,7 @@ handlers[`GET:/photo`] = async ({ url, params }) => {
   }
 }
 
-handlers[`PATCH:/admin/photo`] = async ({ params }) => {
+handlers['PATCH:/admin/photo'] = async ({ params }) => {
   const { deg } = params
   if (!deg) return new Response('Missing deg', { status: 400 })
 
@@ -199,7 +201,7 @@ handlers[`PATCH:/admin/photo`] = async ({ params }) => {
   return new Response(null, { status: 201 })
 }
 
-handlers[`POST:/admin/photo`] = async ({ request, params }) => {
+handlers['POST:/admin/photo'] = async ({ request, params }) => {
   const { filename, sheet } = params
   if (!filename) return new Response('Missing filename', { status: 400 })
   if (!sheet || sheet === 'order') {
@@ -211,7 +213,7 @@ handlers[`POST:/admin/photo`] = async ({ request, params }) => {
   return new Response(null, { status: 201 })
 }
 
-handlers[`DELETE:/admin/photo`] = async ({ params }) => {
+handlers['DELETE:/admin/photo'] = async ({ params }) => {
   const { filename, sheet } = params
   if (!filename) return new Response('Missing filename', { status: 400 })
   if (!sheet || sheet === 'order') {
@@ -228,7 +230,7 @@ handlers[`DELETE:/admin/photo`] = async ({ params }) => {
   await Promise.all(deleteWork)
 
   return new Response(null, { status: 204 })
-}  
+}
 
 class Response {
   constructor(body, init) {
@@ -246,7 +248,10 @@ const serve = async (fn) => {
   }
 
   const { createServer } = await import('https')
-  return createServer({ cert, key: await readFile('/etc/elsamcreations.key') }, fn)
+  return createServer(
+    { cert, key: await readFile('/etc/elsamcreations.key') },
+    fn,
+  )
 }
 
 const server = await serve(async (req, res) => {
