@@ -93,7 +93,7 @@ const getAllCouettes = async () => {
   )
 
   const couettesInfo = couettesList
-    .filter((ent) => ent.isDirectory())
+    .filter((ent) => ent.isDirectory() && ent.name !== 'orders')
     .map(async ({ name }) => {
       const sheetDir = `${root}/${name}`
       const { birthtimeMs: createdAt } = await stat(sheetDir)
