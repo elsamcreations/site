@@ -23,7 +23,9 @@ selectedSheet.on((meta) => {
 
 bottomBar.onsubmit = (e) => {
   e.preventDefault()
-  document.querySelector('#sheets').classList.toggle('confirmed')
+  if (document.querySelector('#sheets').classList.toggle('confirmed')) {
+    window.location.hash = '#clothing'
+  }
 }
 
 export const Sheet = (couette) => {
