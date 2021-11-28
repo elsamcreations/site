@@ -224,10 +224,10 @@
         const sheet = input.value
           .toLowerCase()
           .normalize('NFD')
-          .replace(/-/g, ' ')
-          .replace(/[^a-z0-9 ]/g, '')
+          .replace(/\p{Diacritic}/gu, '')
+          .replace(/([^a-z0-9]+)/g, ' ')
           .trim()
-          .replace(/\s+/g, '-')
+          .replace(/ /g, '_')
 
         if (!sheet.length) return // TODO: show error maybe ?
         if (couettes.find(c => c.name === sheet)) return
