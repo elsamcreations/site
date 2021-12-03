@@ -71,7 +71,7 @@
 #sheets.confirmed .bottom-bar button:after { content: 'Change' }
 #sheets .bottom-bar button:after { content: 'Pick me' }
 .fr #sheets.confirmed .bottom-bar button:after { content: 'Changer' }
-.fr #sheets .bottom-bar button:after { content: 'Choisi moi' }
+.fr #sheets .bottom-bar button:after { content: 'Choisis-moi' }
 
 .sheet input[type="radio"]:not(:checked) + .preview { opacity: 0.66 }
 .sheet input[type="radio"]:not(:checked) + .preview:active { opacity: 0.33 }
